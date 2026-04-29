@@ -1,0 +1,200 @@
+.panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+}
+
+.panelEmbedded {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  flex: 1;
+}
+
+.embeddedBody {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  gap: 0.5rem;
+}
+
+.embeddedScroll {
+  flex: 1 1 auto;
+  min-height: 120px;
+  max-height: 42vh;
+  overflow-y: auto;
+  border: 1px solid #222;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 0.5rem 0.65rem;
+  border-radius: 2px;
+}
+
+.embeddedFooter {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.shortcutsEmbedded {
+  margin-bottom: 0;
+}
+
+.shortcut {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #c9d1d9;
+  border-radius: 3px;
+  padding: 0.28rem 0.5rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.shortcut:hover {
+  border-color: #f85149;
+  color: #ffa198;
+}
+
+.shortcut:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 2px;
+}
+
+.shortcut:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clearCache {
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #8b949e;
+  border-radius: 3px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  margin-bottom: 0.35rem;
+}
+
+.clearCache:hover {
+  border-color: #d29922;
+  color: #d29922;
+}
+
+.clearCache:focus-visible {
+  outline: 2px solid #d29922;
+  outline-offset: 2px;
+}
+
+.field {
+  margin-bottom: 0;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 64px;
+  max-height: 120px;
+  background: #080808;
+  color: #e6edf3;
+  border: 1px solid #222;
+  border-radius: 3px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.8rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.textarea:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 1px;
+}
+
+.send {
+  background: #b62324;
+  border: 1px solid #da3633;
+  color: #fff;
+  border-radius: 3px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 0.35rem;
+}
+
+.send:hover {
+  background: #da3633;
+}
+
+.send:focus-visible {
+  outline: 2px solid #ff7b72;
+  outline-offset: 2px;
+}
+
+.send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.response {
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.85rem;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.responseEmbedded {
+  margin-top: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.loading {
+  color: #8b949e;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.error {
+  color: #f85149;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: #6e7681;
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.hint code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  font-size: 0.85em;
+  background: #0d1117;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  color: #79c0ff;
+}

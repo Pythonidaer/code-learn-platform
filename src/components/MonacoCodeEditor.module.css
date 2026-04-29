@@ -1,0 +1,22 @@
+.wrap {
+  border: 1px solid #222;
+  border-radius: 0;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.wrapFlex {
+  flex: 1 1 auto;
+  min-height: 120px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapFlex :global(.monaco-editor) {
+  flex: 1;
+}
+
+.wrap :global(.monaco-editor) {
+  background-color: #050508 !important;
+}

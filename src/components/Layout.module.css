@@ -1,0 +1,75 @@
+.layout {
+  --layout-header-height: 3.25rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #050505;
+  color: #e6edf3;
+}
+
+.header {
+  border-bottom: 1px solid #222;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: #050505;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: #f0f0f0;
+  text-decoration: none;
+}
+
+.logo:hover {
+  color: #ff7b72;
+}
+
+.logo:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  color: #8b949e;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.nav a:hover {
+  color: #ff7b72;
+}
+
+.nav a:focus-visible {
+  outline: 2px solid #3fb950;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.main {
+  flex: 1;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.mainChallengeDetail {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--layout-header-height));
+}

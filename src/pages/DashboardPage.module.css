@@ -1,0 +1,187 @@
+.page h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  color: #6e7681;
+  margin: 0 0 1.75rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-width: 42rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat {
+  background: #080808;
+  border: 1px solid #222;
+  border-radius: 2px;
+  padding: 0.85rem 1rem;
+}
+
+.stat strong {
+  display: block;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #e6edf3;
+}
+
+.stat:last-child strong {
+  color: #3fb950;
+}
+
+.stat span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6e7681;
+}
+
+.sectionTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin: 1.75rem 0 0.6rem;
+  color: #6e7681;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.quick a {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 2px;
+  color: #c9d1d9;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.quick a:hover {
+  border-color: #f85149;
+  color: #ff7b72;
+}
+
+.quick a:focus-visible {
+  outline: 2px solid #3fb950;
+  outline-offset: 2px;
+}
+
+.catList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.catList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 0.88rem;
+}
+
+.catList a {
+  color: #ff7b72;
+  text-decoration: none;
+}
+
+.catList a:hover {
+  color: #ffa198;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.catList a:focus-visible {
+  outline: 2px solid #3fb950;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.count {
+  color: #6e7681;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.dangerZone {
+  margin-top: 2.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 2px;
+  border: 1px solid #da3633;
+  background: rgba(182, 35, 36, 0.08);
+}
+
+.dangerTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #ff7b72;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.dangerNote {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  color: #8b949e;
+  line-height: 1.45;
+}
+
+.dangerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.dangerBtn,
+.dangerBtnStrong {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 2px;
+  cursor: pointer;
+  border: 1px solid #f85149;
+  background: #141414;
+  color: #ffa198;
+}
+
+.dangerBtn:hover,
+.dangerBtnStrong:hover {
+  border-color: #ff7b72;
+  color: #ffc1bc;
+  background: rgba(248, 81, 73, 0.08);
+}
+
+.dangerBtn:focus-visible,
+.dangerBtnStrong:focus-visible {
+  outline: 2px solid #ff7b72;
+  outline-offset: 2px;
+}
+
+.dangerBtnStrong {
+  border-color: #da3633;
+  background: rgba(218, 54, 51, 0.18);
+  font-weight: 600;
+  color: #ff7b72;
+}

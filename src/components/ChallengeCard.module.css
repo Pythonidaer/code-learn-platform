@@ -1,0 +1,73 @@
+.card {
+  display: block;
+  border: 1px solid #222;
+  border-radius: 2px;
+  padding: 1rem 1.1rem;
+  background: #080808;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.card:hover {
+  border-color: #f85149;
+  background: #0d0d0d;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.typeCoding {
+  background: rgba(63, 185, 80, 0.2);
+  color: #3fb950;
+}
+.typeDebugging {
+  background: rgba(210, 153, 34, 0.2);
+  color: #d29922;
+}
+.typeQuiz {
+  background: rgba(163, 113, 247, 0.2);
+  color: #a371f7;
+}
+.typeReact {
+  background: rgba(248, 81, 73, 0.15);
+  color: #ff7b72;
+}
+
+.difficultyEasy {
+  color: #3fb950;
+}
+.difficultyMedium {
+  color: #d29922;
+}
+.difficultyHard {
+  color: #f85149;
+}
+
+.done {
+  margin-left: auto;
+  color: #3fb950;
+  font-weight: 600;
+  font-size: 0.75rem;
+}

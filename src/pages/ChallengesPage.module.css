@@ -1,0 +1,18 @@
+.page h1 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+.list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.empty {
+  color: #8b949e;
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed #2a2a2a;
+  border-radius: 2px;
+  background: #080808;
+}

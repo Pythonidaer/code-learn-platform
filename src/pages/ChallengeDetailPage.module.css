@@ -1,0 +1,1013 @@
+.detail {
+  padding: 1.25rem 1.5rem 3rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.detail h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+  color: #8b949e;
+}
+
+.prompt {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  color: #8b949e;
+  margin-bottom: 0.35rem;
+}
+
+.codeBlock {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 180px;
+  background: #0d1117;
+  color: #e6edf3;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  font-size: 0.8rem;
+  resize: vertical;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: #58a6ff;
+}
+
+.btnPrimary {
+  background: #238636;
+  border: 1px solid #2ea043;
+  color: #e6edf3;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.btnPrimary:hover {
+  border-color: #3fb950;
+}
+
+.reveal {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.quizChoices {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.quizChoices label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.quizChoices input {
+  margin-top: 0.2rem;
+}
+
+.feedbackOk {
+  color: #3fb950;
+}
+
+.feedbackBad {
+  color: #f85149;
+}
+
+.hookList {
+  margin: 0 0 1rem 1rem;
+  color: #8b949e;
+  font-size: 0.9rem;
+}
+
+.notFound {
+  color: #8b949e;
+}
+
+.tutorSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #30363d;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.titleRow h1 {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.splitWrap {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .splitWrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+.leftPane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.rightPane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: sticky;
+  top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .leftPane {
+    max-height: none;
+  }
+  .rightPane {
+    position: static;
+  }
+}
+
+.section {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+
+.section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b949e;
+}
+
+.prose {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.examplesList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  color: #c9d1d9;
+}
+
+.constraintsList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  color: #8b949e;
+}
+
+.editorActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.submitWarn {
+  color: #d29922;
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.resetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.btnDanger {
+  background: transparent;
+  border: 1px solid #f85149;
+  color: #f85149;
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.btnDanger:hover {
+  background: rgba(248, 81, 73, 0.12);
+}
+
+details.tutorDetails > summary {
+  cursor: pointer;
+  color: #58a6ff;
+  font-size: 0.88rem;
+  margin-bottom: 0.5rem;
+}
+
+.verifiedRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #c9d1d9;
+}
+
+/* --- Full-width coding workspace (HackerRank-style) --- */
+
+.codingWorkspace {
+  display: grid;
+  /* Fallback before inline style: capped problem | flexible editor | grip | tutor */
+  grid-template-columns: clamp(260px, 26vw, 440px) minmax(0, 1fr) 6px 320px;
+  width: 100%;
+  min-height: calc(100vh - var(--layout-header-height, 3.25rem));
+  background: #050505;
+  border-top: 1px solid #222;
+  overflow: hidden;
+}
+
+/* Lock row to viewport so growing the console cannot stretch the grid past the screen (which scrolled the page and moved the tutor). */
+.codingWorkspace.codingWorkspaceDesktop {
+  height: calc(100vh - var(--layout-header-height, 3.25rem));
+  max-height: calc(100vh - var(--layout-header-height, 3.25rem));
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.codingWorkspace > * {
+  min-height: 0;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .codingWorkspace {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    height: auto;
+    max-height: none;
+    grid-template-rows: none;
+  }
+
+  .wsGridProblem,
+  .wsGridCenter,
+  .wsGridTutor {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+/* One row, four columns on desktop — prevents overlap between center toolbar and resize strip */
+.codingWorkspaceDesktop .wsGridProblem {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.codingWorkspaceDesktop .wsGridCenter {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.codingWorkspaceDesktop .wsGridResize {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.codingWorkspaceDesktop .wsGridTutor {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.codingWorkspaceDesktop .wsPanelCenter {
+  align-self: stretch;
+  min-height: 0;
+}
+
+/* Desktop: switch wsCenterMain from flex-column to an explicit 3-row CSS grid.
+   Row sizes are set via inline style: `minmax(120px, 1fr) 6px ${consoleHeight}px`
+   This makes the editor, handle, and console each occupy exactly their allocated row —
+   no flex-shrink math, no overflow ambiguity. */
+.codingWorkspaceDesktop .wsCenterMain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  /* grid-template-rows overridden by inline style; fallback keeps layout sane */
+  grid-template-rows: minmax(120px, 1fr) 6px 200px;
+  align-items: stretch;
+}
+
+.wsPanel {
+  display: flex;
+  flex-direction: column;
+  background: #050505;
+  border-right: 1px solid #222;
+}
+
+.wsPanel:last-child {
+  border-right: none;
+}
+
+@media (max-width: 1024px) {
+  .wsPanel {
+    border-right: none;
+    border-bottom: 1px solid #222;
+  }
+
+  .wsPanel:last-child {
+    border-bottom: none;
+  }
+}
+
+.wsProblemRail {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  min-height: 0;
+  border-right: 1px solid #222;
+}
+
+/* Same top band as the open "Problem" header so expand sits where collapse was. */
+.wsProblemRailHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.4rem 0.3rem;
+  background: #080808;
+  border-bottom: 1px solid #222;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .wsProblemRail {
+    flex-direction: row;
+    min-height: 0;
+    border-bottom: 1px solid #222;
+    border-right: none;
+  }
+
+  .wsProblemRailHeader {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Dedicated grid column between editor and AI tutor (avoids overlap with center controls) */
+.resizeHandleColCell {
+  box-sizing: border-box;
+  width: 6px;
+  min-width: 0;
+  max-width: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-left: 1px solid #222;
+  border-right: 1px solid #222;
+  background: #141414;
+  cursor: col-resize;
+  appearance: none;
+  border-radius: 0;
+  min-height: 0;
+  overflow: hidden;
+  flex: none;
+  justify-self: stretch;
+  align-self: stretch;
+}
+
+.resizeHandleColCell:hover,
+.resizeHandleColCell:focus-visible {
+  background: #2a2a2a;
+}
+
+.resizeHandleColCell:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.resizeHandleRow {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  height: 6px;
+  cursor: row-resize;
+  touch-action: none;
+  background: #141414;
+  border: none;
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  border-radius: 0;
+  width: 100%;
+}
+
+.resizeHandleRow:hover,
+.resizeHandleRow:focus-visible {
+  background: #2a2a2a;
+}
+
+.resizeHandleRow:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.wsPanelCenter {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile base: plain flex column so editor/console stack naturally. */
+.wsCenterMain {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Editor area (grid row 1 on desktop, flex item on mobile). */
+.wsEditorArea {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wsPanelHeader {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.4rem 0.65rem;
+  background: #080808;
+  border-bottom: 1px solid #222;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.wsPanelHeaderProblem {
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Tutor header: collapse btn left | title+icon group centre | spacer right.
+   overflow: visible is required so the tooltip isn't clipped by the base
+   wsPanelHeader's overflow-x: auto. */
+.wsPanelHeaderTutor {
+  justify-content: space-between;
+  gap: 0.5rem;
+  overflow: visible;
+}
+
+/* Title and ⓘ icon sit together, centred between the two flex edges. */
+.wsTutorTitleGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Invisible spacer — same visual width as the collapse button — keeps the title group truly centred. */
+.wsPanelTitleSpacer {
+  display: inline-block;
+  width: calc(0.72rem + 0.9rem + 2px); /* font-size + padding + border of collapse btn */
+  flex-shrink: 0;
+}
+
+/* Info icon (ⓘ) with CSS-only tooltip that opens to the right. */
+.tutorInfoWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tutorInfoIcon {
+  font-size: 0.78rem;
+  color: #6e7681;
+  cursor: default;
+  user-select: none;
+  line-height: 1;
+}
+
+.tutorInfoIcon:hover {
+  color: #8b949e;
+}
+
+/* Portalled to <body> so it escapes any overflow:hidden ancestor.
+   position:fixed + left/top set by JS (smart-positioned to avoid viewport edges). */
+.tutorInfoTooltip {
+  position: fixed;
+  width: 230px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #c9d1d9;
+  white-space: normal;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.tutorInfoTooltip code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: #0d1117;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  color: #79c0ff;
+}
+
+.wsPanelHeaderCollapseBtn {
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.45rem;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid #333;
+  color: #8b949e;
+  border-radius: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.wsPanelHeaderCollapseBtn:hover {
+  border-color: #f85149;
+  color: #ffa198;
+}
+
+.wsPanelHeaderCollapseBtn:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 2px;
+}
+
+.wsPanelTitle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8b949e;
+}
+
+.wsFileTab {
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e6edf3;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.wsStatusPill {
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: #d29922;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid #3d3d1f;
+  border-radius: 2px;
+  background: rgba(210, 153, 34, 0.08);
+}
+
+.wsStatusDone {
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+  color: #3fb950;
+  border: 1px solid #238636;
+  background: rgba(35, 134, 54, 0.12);
+}
+
+.wsHeaderActions {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.wsBtnGhost {
+  font: inherit;
+  font-size: 0.68rem;
+  padding: 0.3rem 0.5rem;
+  background: transparent;
+  border: 1px solid #333;
+  color: #8b949e;
+  border-radius: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wsBtnGhost:hover {
+  border-color: #f85149;
+  color: #ffa198;
+}
+
+.wsBtnGhost:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 2px;
+}
+
+.wsBtnRun {
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  background: #141414;
+  border: 1px solid #3a3a3a;
+  color: #e6edf3;
+  border-radius: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wsBtnRun:hover:not(:disabled) {
+  border-color: #8b949e;
+}
+
+.wsBtnRun:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wsBtnRun:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+}
+
+.wsBtnSubmit {
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  background: #b62324;
+  border: 1px solid #da3633;
+  color: #fff;
+  border-radius: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.wsBtnSubmit:hover:not(:disabled) {
+  background: #da3633;
+}
+
+.wsBtnSubmit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wsBtnSubmit:focus-visible {
+  outline: 2px solid #ff7b72;
+  outline-offset: 2px;
+}
+
+.wsPanelBodyScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.85rem 1rem 1.5rem;
+}
+
+.wsBack {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: #ff7b72;
+  text-decoration: none;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.wsBack:hover {
+  color: #ffa198;
+}
+
+.wsBack:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 2px;
+}
+
+.wsTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #f0f0f0;
+}
+
+.wsBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.wsBadgeDiff {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid #da3633;
+  color: #ff7b72;
+  border-radius: 2px;
+  background: rgba(182, 35, 36, 0.15);
+}
+
+.wsBadgeMeta {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b949e;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid #2a2a2a;
+  border-radius: 2px;
+}
+
+.wsBadgeDone {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #3fb950;
+  border: 1px solid #238636;
+  padding: 0.2rem 0.45rem;
+  border-radius: 2px;
+}
+
+.wsBlock {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.wsBlock:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.wsLabel {
+  margin: 0 0 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6e7681;
+}
+
+.wsProse {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+}
+
+.wsList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  color: #c9d1d9;
+  line-height: 1.5;
+}
+
+.wsMutedList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  color: #8b949e;
+  line-height: 1.45;
+}
+
+.wsTestName {
+  color: #e6edf3;
+}
+
+.wsPre {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  background: #080808;
+  border: 1px solid #222;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.76rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: #c9d1d9;
+}
+
+.wsEditorStack {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  background: #050508;
+}
+
+/* Grid row 1 (minmax(120px, 1fr)) controls editor height; no CSS max-height needed. */
+
+.wsBannerOk {
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  color: #3fb950;
+  background: rgba(35, 134, 54, 0.12);
+  border-bottom: 1px solid #1f2a1f;
+}
+
+.wsBannerFail {
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  color: #ff7b72;
+  background: rgba(248, 81, 73, 0.1);
+  border-bottom: 1px solid #2a1f1f;
+}
+
+.wsBannerWarn {
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  color: #d29922;
+  background: rgba(210, 153, 34, 0.1);
+  border-bottom: 1px solid #2a2618;
+}
+
+/* Desktop: sits in its own grid row — no flex sizing needed.
+   Mobile: shrinks naturally in the flex column. */
+.wsConsole {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #222;
+  background: #080808;
+  overflow: hidden;
+  min-height: 120px;
+}
+
+.wsConsoleHead {
+  flex-shrink: 0;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6e7681;
+  border-bottom: 1px solid #222;
+}
+
+.wsConsoleBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.35rem 0.65rem 0.65rem;
+}
+
+.wsTutorBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.65rem 0.75rem;
+  overflow: hidden;
+}
+
+/* Collapsed AI-tutor rail — mirrors the Problem rail on the left. */
+.wsTutorRail {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+  min-height: 0;
+  border-left: 1px solid #222;
+  border-right: none;
+}
+
+.wsTutorRailHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.4rem 0.3rem;
+  background: #080808;
+  border-bottom: 1px solid #222;
+  box-sizing: border-box;
+}
+
+.wsPanel .verifiedRow {
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  border-bottom: 1px solid #222;
+  margin: 0;
+  background: #080808;
+}
