@@ -373,15 +373,13 @@ details.tutorDetails > summary {
   min-height: 0;
 }
 
-/* Desktop: switch wsCenterMain from flex-column to an explicit 3-row CSS grid.
-   Row sizes are set via inline style: `minmax(120px, 1fr) 6px ${consoleHeight}px`
-   This makes the editor, handle, and console each occupy exactly their allocated row —
-   no flex-shrink math, no overflow ambiguity. */
+/* Desktop: switch wsCenterMain from flex-column to an explicit 4-row CSS grid.
+   Rows: editor | actions bar | splitter (6px) | console.
+   grid-template-rows overridden inline; fallback keeps layout sane. */
 .codingWorkspaceDesktop .wsCenterMain {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  /* grid-template-rows overridden by inline style; fallback keeps layout sane */
-  grid-template-rows: minmax(120px, 1fr) 6px 200px;
+  grid-template-rows: minmax(120px, 1fr) 48px 6px 200px;
   align-items: stretch;
 }
 
@@ -534,6 +532,36 @@ details.tutorDetails > summary {
   overflow: hidden;
 }
 
+/* Fixed band above Test output (Clear / Run / Submit). Sync height with CENTER_EDITOR_ACTIONS_BAR_PX. */
+.wsEditorActionsBar {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 0.65rem;
+  background: #080808;
+  border-top: 1px solid #222;
+  min-width: 0;
+}
+
+.codingWorkspaceDesktop .wsEditorActionsBar {
+  height: 100%;
+  max-height: 48px;
+  min-height: 0;
+}
+
+.wsEditorActionsGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .wsPanelHeader {
   flex-shrink: 0;
   display: flex;
@@ -573,6 +601,17 @@ details.tutorDetails > summary {
   display: inline-block;
   width: calc(0.72rem + 0.9rem + 2px); /* font-size + padding + border of collapse btn */
   flex-shrink: 0;
+}
+
+/* Portaled tutor actions (⚙ host): matches collapse-btn footprint so title stays centred. */
+.wsTutorHeaderActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: calc(0.72rem + 0.9rem + 2px);
+  min-height: 1.35rem;
+  position: relative;
 }
 
 /* Info icon (ⓘ) with CSS-only tooltip that opens to the right. */
@@ -682,18 +721,6 @@ details.tutorDetails > summary {
   border: 1px solid #238636;
   background: rgba(35, 134, 54, 0.12);
 }
-
-.wsHeaderActions {
-  margin-left: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-  justify-content: flex-end;
-  min-width: 0;
-  max-width: 100%;
-}
-
 .wsBtnGhost {
   font: inherit;
   font-size: 0.68rem;

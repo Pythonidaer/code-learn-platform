@@ -52,23 +52,27 @@ State: `problemCollapsed` (boolean), persisted to `localStorage` key `code-learn
 Full-height flex column; fills grid cell via `align-self: stretch`.
 
 ### `.wsPanelHeader`
-Fixed-height toolbar: filename tab | status pill | `[Clear saved answer]` | `[Run Code]` | `[Submit]`.
+Fixed-height toolbar: filename tab (`solution.js`) | status pill (“In progress”, etc.).
 
 ### `.wsCenterMain` (div, ref: `centerMainRef`)
 Switches from `display: flex` (mobile) to `display: grid` (desktop).  
 Desktop `gridTemplateRows` is set as inline style:
 
 ```
-minmax(120px, 1fr)   ← editor area (never below 120px)
-6px                  ← drag handle
-${consoleHeight}px   ← test output console
+minmax(120px, 1fr)           ← editor area (never below 120px)
+CENTER_EDITOR_ACTIONS_BAR_PX ← Clear / Run / Submit (48px)
+6px                          ← drag handle
+${consoleHeight}px           ← test output console
 ```
 
 #### Row 1: `.wsEditorArea`
 Flex column containing the Monaco editor + status banners.  
 `wsEditorStack` fills the area via `flex: 1 1 auto`.
 
-#### Row 2: `.resizeHandleRow`
+#### Row 2: `.wsEditorActionsBar`
+Action buttons (Clear saved answer, Clear completion when applicable, Run Code, Submit). Sits directly under the editor stack, above the splitter.
+
+#### Row 3: `.resizeHandleRow`
 6px drag handle, `cursor: row-resize`.  
 `onMouseDown` fires `beginConsoleResize`.
 
@@ -76,11 +80,12 @@ Flex column containing the Monaco editor + status banners.
 ```
 startH = consoleHeight at mousedown
 delta  = startY - e.clientY   (negative when dragging down → console shrinks)
-maxH   = centerMainRef.clientHeight - 126  (120px editor min + 6px handle)
+maxH   = centerMainRef.clientHeight - CONSOLE_RESERVE_ABOVE_PX
 newH   = clamp(startH - delta, CONSOLE_HEIGHT_MIN, maxH)
 ```
+`CONSOLE_RESERVE_ABOVE_PX` = 120 (min editor) + 48 (actions bar) + 6 (handle) = **174**.
 
-#### Row 3: `.wsConsole`
+#### Row 4: `.wsConsole`
 Fixed-height console whose size is determined entirely by the grid row (`consoleHeight`px).  
 Contains: `wsConsoleHead` header + `wsConsoleBody` (scrollable, `TestResultsPanel`).
 
@@ -115,7 +120,8 @@ The `.resizeHandleColCell` (column 3) handles horizontal resizing.
 ```
 startW = tutorInnerWidth at mousedown
 delta  = startX - e.clientX   (positive when dragging left → tutor grows)
-newW   = clamp(startW + delta, TUTOR_WIDTH_MIN=260, TUTOR_WIDTH_MAX=520)
+newW   = clamp(startW + delta), min=TUTOR_WIDTH_MIN (260),
+         max = tutorWidthUpperBoundPx(window.innerWidth) (≈ vw − problem − editor reserve, cap 1200px)
 ```
 
 Width persisted to `localStorage` key `code-learn-ws-tutor-width`.
@@ -130,8 +136,8 @@ All helpers are in `src/utils/workspaceLayoutStorage.ts`.
 |-----|------|---------|-------|
 | `code-learn-ws-problem-collapsed` | `'0'` / `'1'` | `false` | — |
 | `code-learn-ws-tutor-collapsed` | `'0'` / `'1'` | `false` | — |
-| `code-learn-ws-tutor-width` | number (px) | 320 | 260–520 |
-| `code-learn-ws-console-height` | number (px) | 200 | 120–(mainH−126) |
+| `code-learn-ws-tutor-width` | number (px) | 320 | 260–`tutorWidthUpperBoundPx(vw)` (hard cap 1200) |
+| `code-learn-ws-console-height` | number (px) | 200 | 120–(mainH−174) |
 
 ---
 

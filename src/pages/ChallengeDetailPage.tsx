@@ -22,6 +22,8 @@ import {
   isReactChallenge,
   challengeHasAutomatedTests,
 } from '../types/challenge'
+import { MarkdownMessage } from '../components/MarkdownMessage'
+import markdownStyles from '../components/MarkdownMessage.module.css'
 import { ENABLE_AI_TUTOR } from '../config/features'
 import type { TestRunPhase } from '../types/ai'
 import { useProgress } from '../hooks/useProgress'
@@ -35,7 +37,9 @@ import {
   type ChallengeTestResult,
 } from '../utils/runChallengeTests'
 import {
+  CENTER_EDITOR_ACTIONS_BAR_PX,
   CONSOLE_HEIGHT_MIN,
+  CONSOLE_RESERVE_ABOVE_PX,
   TUTOR_COLLAPSED_RAIL_PX,
   clampConsoleHeight,
   clampTutorWidth,
@@ -189,6 +193,8 @@ function CodingOrDebuggingView({
   const [tutorCollapsed, setTutorCollapsed] = useState(() =>
     loadTutorCollapsed(),
   )
+  const [tutorHeaderActionsHost, setTutorHeaderActionsHost] =
+    useState<HTMLSpanElement | null>(null)
   const [centerMaxConsole, setCenterMaxConsole] = useState(480)
 
   const tutorEnabled = ENABLE_AI_TUTOR
@@ -208,6 +214,15 @@ function CodingOrDebuggingView({
   useEffect(() => {
     saveTutorWidth(tutorInnerWidth)
   }, [tutorInnerWidth])
+
+  useEffect(() => {
+    if (!tutorEnabled || !layoutDesktop) return
+    const onResize = () => {
+      setTutorInnerWidth((w) => clampTutorWidth(w, window.innerWidth))
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [tutorEnabled, layoutDesktop])
 
   useEffect(() => {
     saveConsoleHeight(consoleHeight)
@@ -245,7 +260,7 @@ function CodingOrDebuggingView({
       const startW = tutorInnerWidth
       const onMove = (e: MouseEvent) => {
         const delta = startX - e.clientX
-        setTutorInnerWidth(clampTutorWidth(startW + delta))
+        setTutorInnerWidth(clampTutorWidth(startW + delta, window.innerWidth))
       }
       const onUp = () => {
         document.removeEventListener('mousemove', onMove)
@@ -270,7 +285,10 @@ function CodingOrDebuggingView({
         const delta = e.clientY - startY
         const mainEl = centerMainRef.current
         const maxH = mainEl
-          ? Math.max(CONSOLE_HEIGHT_MIN, mainEl.clientHeight - 126)
+          ? Math.max(
+              CONSOLE_HEIGHT_MIN,
+              mainEl.clientHeight - CONSOLE_RESERVE_ABOVE_PX,
+            )
           : centerMaxConsole
         setConsoleHeight(clampConsoleHeight(startH - delta, maxH))
       }
@@ -437,19 +455,27 @@ function CodingOrDebuggingView({
       {challenge.conceptExplanation ? (
         <section className={styles.wsBlock}>
           <h2 className={styles.wsLabel}>Concept</h2>
-          <div className={styles.wsProse}>{challenge.conceptExplanation}</div>
+          <MarkdownMessage
+            content={challenge.conceptExplanation}
+            className={markdownStyles.problemPanel}
+          />
         </section>
       ) : null}
       <section className={styles.wsBlock}>
         <h2 className={styles.wsLabel}>Problem</h2>
-        <div className={styles.wsProse}>{challenge.prompt}</div>
+        <MarkdownMessage
+          content={challenge.prompt}
+          className={markdownStyles.problemPanel}
+        />
       </section>
       {challenge.examples?.length ? (
         <section className={styles.wsBlock}>
           <h2 className={styles.wsLabel}>Examples</h2>
           <ul className={styles.wsList}>
             {challenge.examples.map((ex) => (
-              <li key={ex.slice(0, 40)}>{ex}</li>
+              <li key={ex.slice(0, 40)}>
+                <MarkdownMessage content={ex} className={markdownStyles.problemMuted} />
+              </li>
             ))}
           </ul>
         </section>
@@ -459,7 +485,9 @@ function CodingOrDebuggingView({
           <h2 className={styles.wsLabel}>Constraints</h2>
           <ul className={styles.wsMutedList}>
             {challenge.constraints.map((c) => (
-              <li key={c}>{c}</li>
+              <li key={c}>
+                <MarkdownMessage content={c} className={markdownStyles.problemMuted} />
+              </li>
             ))}
           </ul>
         </section>
@@ -467,7 +495,10 @@ function CodingOrDebuggingView({
       {'expectedBehavior' in challenge && challenge.expectedBehavior ? (
         <section className={styles.wsBlock}>
           <h2 className={styles.wsLabel}>Expected behavior</h2>
-          <div className={styles.wsProse}>{challenge.expectedBehavior}</div>
+          <MarkdownMessage
+            content={challenge.expectedBehavior}
+            className={markdownStyles.problemPanel}
+          />
         </section>
       ) : null}
       {/* React-specific sections */}
@@ -475,11 +506,17 @@ function CodingOrDebuggingView({
         <>
           <section className={styles.wsBlock}>
             <h2 className={styles.wsLabel}>Expected behavior</h2>
-            <div className={styles.wsProse}>{challenge.expectedRenderBehavior}</div>
+            <MarkdownMessage
+              content={challenge.expectedRenderBehavior}
+              className={markdownStyles.problemPanel}
+            />
           </section>
           <section className={styles.wsBlock}>
             <h2 className={styles.wsLabel}>Data flow</h2>
-            <div className={styles.wsProse}>{challenge.dataFlowExplanation}</div>
+            <MarkdownMessage
+              content={challenge.dataFlowExplanation}
+              className={markdownStyles.problemPanel}
+            />
           </section>
           {challenge.hookConcepts.length ? (
             <section className={styles.wsBlock}>
@@ -534,10 +571,11 @@ function CodingOrDebuggingView({
       }
     : undefined
 
-  /* Desktop: wsCenterMain is a CSS grid; rows are `minmax(120px,1fr) 6px ${consoleHeight}px`.
-     The console div needs no explicit size — the grid row handles it. */
+  /* Desktop: grid rows = editor | actions bar | splitter | console. */
   const centerMainGridStyle = layoutDesktop
-    ? { gridTemplateRows: `minmax(120px, 1fr) 6px ${consoleHeight}px` }
+    ? {
+        gridTemplateRows: `minmax(120px, 1fr) ${CENTER_EDITOR_ACTIONS_BAR_PX}px 6px ${consoleHeight}px`,
+      }
     : undefined
 
   return (
@@ -599,48 +637,10 @@ function CodingOrDebuggingView({
           >
             {statusLabel}
           </span>
-          <div className={styles.wsHeaderActions}>
-            <button
-              type="button"
-              className={styles.wsBtnGhost}
-              onClick={clearAnswer}
-            >
-              Clear saved answer
-            </button>
-            {done ? (
-              <button
-                type="button"
-                className={styles.wsBtnGhost}
-                onClick={clearCompletion}
-              >
-                Clear completion
-              </button>
-            ) : null}
-            <button
-              type="button"
-              className={styles.wsBtnRun}
-              disabled={
-                running || !automated || manualOnly || tests.length === 0
-              }
-              onClick={() => void handleRunTests()}
-              data-testid="run-tests"
-            >
-              Run Code
-            </button>
-            <button
-              type="button"
-              className={styles.wsBtnSubmit}
-              disabled={running || (!manualOnly && !automated)}
-              onClick={() => void handleSubmit()}
-              data-testid="submit-challenge"
-            >
-              {manualOnly ? 'Mark complete' : 'Submit'}
-            </button>
-          </div>
         </div>
 
-        {/* Desktop: this div is a CSS grid (3 rows: editor | handle | console).
-            Mobile: plain flex column. gridTemplateRows is set via inline style. */}
+        {/* Desktop: CSS grid rows: editor | actions bar | splitter | console.
+            Mobile: flex column (same DOM order). gridTemplateRows via inline style. */}
         <div
           ref={centerMainRef}
           className={styles.wsCenterMain}
@@ -700,7 +700,52 @@ function CodingOrDebuggingView({
             ) : null}
           </div>
 
-          {/* Grid row 2 on desktop: resize handle (6px) */}
+          <div
+            className={styles.wsEditorActionsBar}
+            role="toolbar"
+            aria-label="Editor actions"
+          >
+            <div className={styles.wsEditorActionsGroup}>
+              <button
+                type="button"
+                className={styles.wsBtnGhost}
+                onClick={clearAnswer}
+              >
+                Clear saved answer
+              </button>
+              {done ? (
+                <button
+                  type="button"
+                  className={styles.wsBtnGhost}
+                  onClick={clearCompletion}
+                >
+                  Clear completion
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className={styles.wsBtnRun}
+                disabled={
+                  running || !automated || manualOnly || tests.length === 0
+                }
+                onClick={() => void handleRunTests()}
+                data-testid="run-tests"
+              >
+                Run Code
+              </button>
+              <button
+                type="button"
+                className={styles.wsBtnSubmit}
+                disabled={running || (!manualOnly && !automated)}
+                onClick={() => void handleSubmit()}
+                data-testid="submit-challenge"
+              >
+                {manualOnly ? 'Mark complete' : 'Submit'}
+              </button>
+            </div>
+          </div>
+
+          {/* Resize handle (6px): directly above Test output — keep clear hit target for drag */}
           {layoutDesktop ? (
             <button
               type="button"
@@ -712,7 +757,7 @@ function CodingOrDebuggingView({
             />
           ) : null}
 
-          {/* Grid row 3 on desktop: console (height set by gridTemplateRows) */}
+          {/* Console (desktop row height from gridTemplateRows) */}
           <div className={styles.wsConsole}>
             <div className={styles.wsConsoleHead}>Test output</div>
             <div className={styles.wsConsoleBody}>
@@ -785,8 +830,11 @@ function CodingOrDebuggingView({
                 OpenAI API key support — swap the provider without changing your code.
               </InfoTooltip>
             </span>
-            {/* invisible spacer matches collapse-btn width so title stays centred */}
-            <span className={styles.wsPanelTitleSpacer} aria-hidden />
+            {/* Settings slot: same flex footprint as collapse btn keeps title centred */}
+            <span
+              ref={setTutorHeaderActionsHost}
+              className={styles.wsTutorHeaderActions}
+            />
           </div>
           <div className={styles.wsTutorBody}>
             <AITutorPanel
@@ -797,6 +845,7 @@ function CodingOrDebuggingView({
               allVisibleTestsPassed={allVisiblePass}
               allTestsIncludingHiddenPassed={submitAllPass}
               embedded
+              tutorHeaderActionsHost={tutorHeaderActionsHost}
             />
           </div>
         </aside>

@@ -1,5 +1,7 @@
 import { createContext } from 'react'
 
+import type { TutorThreadMessage } from '../utils/progressStorage'
+
 export interface ProgressContextValue {
   completedIds: Set<string>
   markComplete: (id: string) => void
@@ -10,8 +12,10 @@ export interface ProgressContextValue {
   clearSavedCodeFor: (id: string) => void
   clearAllSavedCode: () => void
   clearAllCompleted: () => void
-  getAiTutorCache: (id: string) => string | undefined
-  setAiTutorCache: (id: string, text: string) => void
+  /** Bumps when any AI tutor local cache is cleared (single challenge or all). */
+  aiTutorCacheEpoch: number
+  getAiTutorThread: (id: string) => TutorThreadMessage[]
+  setAiTutorThread: (id: string, messages: TutorThreadMessage[]) => void
   clearAiTutorCacheFor: (id: string) => void
   clearAllAiTutorCache: () => void
   resetAllLocalData: () => void

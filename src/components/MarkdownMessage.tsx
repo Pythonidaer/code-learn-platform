@@ -1,27 +1,45 @@
+import { createContext, useContext } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { normalizeTutorMarkdown } from '../utils/normalizeTutorMarkdown'
 import styles from './MarkdownMessage.module.css'
+
+/** True while rendering the inner `code` of a markdown code block (`pre` > `code`). */
+const InsidePreContext = createContext(false)
 
 interface Props {
   content: string
+  /** Extra classes on the root (merged with markdown shell styles). */
+  className?: string
 }
 
-export function MarkdownMessage({ content }: Props) {
+function mergeClassNames(...parts: Array<string | undefined>) {
+  return parts.filter(Boolean).join(' ')
+}
+
+export function MarkdownMessage({ content, className }: Props) {
   return (
-    <div className={styles.md}>
+    <div className={mergeClassNames(styles.md, className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          pre({ children }) {
+            return (
+              <InsidePreContext.Provider value={true}>
+                <pre className={styles.pre}>{children}</pre>
+              </InsidePreContext.Provider>
+            )
+          },
           code({ className, children, ...props }) {
-            const match = /language-(\w+)/.exec(className ?? '')
-            const isBlock = match != null
-            if (isBlock) {
+            const insidePre = useContext(InsidePreContext)
+            if (insidePre) {
               return (
-                <pre className={styles.pre}>
-                  <code className={styles.codeBlock} {...props}>
-                    {children}
-                  </code>
-                </pre>
+                <code
+                  className={mergeClassNames(styles.codeBlock, className)}
+                  {...props}
+                >
+                  {children}
+                </code>
               )
             }
             return (
@@ -44,7 +62,7 @@ export function MarkdownMessage({ content }: Props) {
           ),
         }}
       >
-        {content}
+        {normalizeTutorMarkdown(content)}
       </ReactMarkdown>
     </div>
   )

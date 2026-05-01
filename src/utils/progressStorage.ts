@@ -113,21 +113,72 @@ export function clearAllSavedCode(): void {
   localStorage.removeItem(KEY_SAVED_CODE)
 }
 
-// --- AI tutor cache ---
-
 export function getAiCacheMap(): Record<string, string> {
   if (!canUseStorage()) return {}
   return parseJsonRecord(localStorage.getItem(KEY_AI_CACHE))
 }
 
-export function getAiTutorCache(id: string): string | undefined {
-  return getAiCacheMap()[id]
+// --- AI tutor thread (multi-turn, localStorage) ---
+
+export type TutorThreadMessage = {
+  role: 'user' | 'assistant'
+  content: string
 }
 
-export function setAiTutorCache(id: string, text: string): void {
+const AI_THREAD_VERSION = 1
+
+interface StoredThreadEnvelope {
+  v: number
+  messages: TutorThreadMessage[]
+}
+
+function isTutorThreadMessage(o: unknown): o is TutorThreadMessage {
+  if (!o || typeof o !== 'object') return false
+  const m = o as Record<string, unknown>
+  return (
+    (m.role === 'user' || m.role === 'assistant') &&
+    typeof m.content === 'string'
+  )
+}
+
+function parseTutorThread(raw: string): TutorThreadMessage[] {
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed) &&
+      typeof (parsed as StoredThreadEnvelope).v === 'number' &&
+      Array.isArray((parsed as StoredThreadEnvelope).messages)
+    ) {
+      return (parsed as StoredThreadEnvelope).messages.filter(isTutorThreadMessage)
+    }
+  } catch {
+    // Legacy: cached value was a plain assistant markdown string.
+    const t = raw.trim()
+    return t ? [{ role: 'assistant', content: raw }] : []
+  }
+  return []
+}
+
+export function getAiTutorThread(id: string): TutorThreadMessage[] {
+  const raw = getAiCacheMap()[id]
+  if (raw === undefined) return []
+  return parseTutorThread(raw)
+}
+
+export function setAiTutorThread(
+  id: string,
+  messages: TutorThreadMessage[],
+): void {
   if (!canUseStorage()) return
   const map = getAiCacheMap()
-  map[id] = text
+  if (messages.length === 0) {
+    delete map[id]
+  } else {
+    const env: StoredThreadEnvelope = { v: AI_THREAD_VERSION, messages }
+    map[id] = JSON.stringify(env)
+  }
   localStorage.setItem(KEY_AI_CACHE, JSON.stringify(map))
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTutorMessages } from './buildTutorMessages'
+import { buildTutorConversationMessages, buildTutorMessages } from './buildTutorMessages'
 import { challenges } from '../data/questions'
 
 describe('buildTutorMessages', () => {
@@ -71,14 +71,21 @@ describe('buildTutorMessages', () => {
     expect(msgs[0].content).toContain('different wording')
   })
 
-  it('passes user code in user message for review (quiz)', () => {
-    const challenge = challenges.find((c) => c.id === 'quiz-http-methods')!
-    const msgs = buildTutorMessages({
-      challenge,
-      intent: 'review_answer',
-      userCodeOrAnswer: 'Selected: POST',
-    })
-    expect(msgs[1].role).toBe('user')
-    expect(msgs[1].content).toContain('POST')
+  it('buildTutorConversationMessages inserts prior pairs before latest user message', () => {
+    const prior = [{ user: 'First question?', assistant: 'First answer.' }]
+    const msgs = buildTutorConversationMessages(
+      {
+        challenge: closure,
+        intent: 'custom',
+        userQuestion: 'Second question?',
+      },
+      prior,
+    )
+    expect(msgs).toHaveLength(4)
+    expect(msgs[0].role).toBe('system')
+    expect(msgs[1]).toEqual({ role: 'user', content: 'First question?' })
+    expect(msgs[2]).toEqual({ role: 'assistant', content: 'First answer.' })
+    expect(msgs[3].role).toBe('user')
+    expect(msgs[3].content).toContain('Second question?')
   })
 })

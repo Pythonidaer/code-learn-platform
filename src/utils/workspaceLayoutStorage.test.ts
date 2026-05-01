@@ -11,19 +11,22 @@ import {
   maxConsoleHeightForCenterPanel,
   saveProblemCollapsed,
   saveTutorWidth,
+  tutorWidthUpperBoundPx,
+  TUTOR_WIDTH_ABS_MAX,
   TUTOR_WIDTH_DEFAULT,
-  TUTOR_WIDTH_MAX,
   TUTOR_WIDTH_MIN,
 } from './workspaceLayoutStorage'
 
 describe('clampTutorWidth', () => {
-  it('clamps to min/max', () => {
-    expect(clampTutorWidth(100)).toBe(TUTOR_WIDTH_MIN)
-    expect(clampTutorWidth(900)).toBe(TUTOR_WIDTH_MAX)
-    expect(clampTutorWidth(400)).toBe(400)
+  it('clamps to min and viewport-based max', () => {
+    expect(clampTutorWidth(100, 1200)).toBe(TUTOR_WIDTH_MIN)
+    const cap1200 = tutorWidthUpperBoundPx(1200)
+    expect(cap1200).toBeLessThanOrEqual(TUTOR_WIDTH_ABS_MAX)
+    expect(clampTutorWidth(9999, 1200)).toBe(cap1200)
+    expect(clampTutorWidth(400, 1200)).toBe(400)
   })
 
-  it('returns default for non-finite', () => {
+  it('uses current window width when viewport omitted (jsdom default)', () => {
     expect(clampTutorWidth(Number.NaN)).toBe(TUTOR_WIDTH_DEFAULT)
   })
 })
@@ -37,8 +40,8 @@ describe('clampConsoleHeight', () => {
 })
 
 describe('maxConsoleHeightForCenterPanel', () => {
-  it('returns main stack height minus 126px reserve', () => {
-    expect(maxConsoleHeightForCenterPanel(1000)).toBe(874)
+  it('returns main stack height minus reserve (editor min + actions bar + handle)', () => {
+    expect(maxConsoleHeightForCenterPanel(1000)).toBe(826)
   })
 
   it('falls back when invalid', () => {

@@ -170,20 +170,22 @@ function buildIntentSystemBlock(
   }
 }
 
-export function buildTutorMessages(
-  params: BuildTutorMessagesParams,
-): AIMessage[] {
-  const { challenge, userQuestion, userCodeOrAnswer, intent } = params
-
+export function tutorSystemContent(params: BuildTutorMessagesParams): string {
   const systemParts = [
     'You are an experienced coding interview tutor.',
-    buildIntentSystemBlock(intent, params),
+    buildIntentSystemBlock(params.intent, params),
     params.allTestsIncludingHiddenPassed === true
       ? '\nNote for this session: All automated tests (including any hidden checks) have passed for the learner’s current code.\n'
       : '',
     '\n--- Challenge ---\n',
-    challengeSummary(challenge),
+    challengeSummary(params.challenge),
   ]
+
+  return systemParts.join('\n')
+}
+
+export function tutorUserContent(params: BuildTutorMessagesParams): string {
+  const { intent, userQuestion, userCodeOrAnswer } = params
 
   const userParts: string[] = []
 
@@ -199,8 +201,31 @@ export function buildTutorMessages(
     userParts.push('Follow the INTENT rules above for the shortcut the user clicked.')
   }
 
+  return userParts.join('\n\n') || 'Please respond.'
+}
+
+export function buildTutorMessages(
+  params: BuildTutorMessagesParams,
+): AIMessage[] {
   return [
-    { role: 'system', content: systemParts.join('\n') },
-    { role: 'user', content: userParts.join('\n\n') || 'Please respond.' },
+    { role: 'system', content: tutorSystemContent(params) },
+    { role: 'user', content: tutorUserContent(params) },
+  ]
+}
+
+/** Prior turns are complete user → assistant pairs from this thread (excludes the current request). */
+export function buildTutorConversationMessages(
+  params: BuildTutorMessagesParams,
+  priorPairs: Array<{ user: string; assistant: string }>,
+): AIMessage[] {
+  const hist: AIMessage[] = []
+  for (const p of priorPairs) {
+    hist.push({ role: 'user', content: p.user })
+    hist.push({ role: 'assistant', content: p.assistant })
+  }
+  return [
+    { role: 'system', content: tutorSystemContent(params) },
+    ...hist,
+    { role: 'user', content: tutorUserContent(params) },
   ]
 }

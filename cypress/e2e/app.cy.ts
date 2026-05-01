@@ -38,7 +38,8 @@ describe('challenges app', () => {
     cy.get('[data-testid="ai-tutor-panel"]')
       .scrollIntoView()
       .should('be.visible')
-    cy.contains('button', 'Give me a hint').click()
+    cy.get('[data-testid="ai-tutor-settings"]').click()
+    cy.get('[data-testid="ai-tutor-shortcut-hint"]').click()
     cy.wait('@ollamaChat')
     cy.get('[data-testid="ai-tutor-response"]').should(
       'contain',

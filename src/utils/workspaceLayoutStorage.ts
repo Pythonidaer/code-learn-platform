@@ -8,23 +8,47 @@ export const LS_TUTOR_COLLAPSED = 'code-learn-ws-tutor-collapsed'
 export const TUTOR_COLLAPSED_RAIL_PX = 36
 
 export const TUTOR_WIDTH_MIN = 260
-export const TUTOR_WIDTH_MAX = 520
+/** Hard ceiling so the tutor track never exceeds this even on very wide screens. */
+export const TUTOR_WIDTH_ABS_MAX = 1200
 export const TUTOR_WIDTH_DEFAULT = 320
 
 export const CONSOLE_HEIGHT_MIN = 120
 export const CONSOLE_HEIGHT_DEFAULT = 200
-/** Pixels reserved above the console in the center stack (editor min 120 + handle 6). */
-export const CONSOLE_RESERVE_ABOVE_PX = 126
+/** Fixed band under the Monaco editor (Clear / Run / Submit) before the splitter. */
+export const CENTER_EDITOR_ACTIONS_BAR_PX = 48
+/** Pixels reserved above the console: min editor 120px + actions bar + 6px handle. */
+export const CONSOLE_RESERVE_ABOVE_PX =
+  120 + CENTER_EDITOR_ACTIONS_BAR_PX + 6
 
 function canUseStorage(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined'
 }
 
-export function clampTutorWidth(n: number): number {
-  if (!Number.isFinite(n)) return TUTOR_WIDTH_DEFAULT
+/**
+ * Max tutor column width for a viewport, leaving room for the problem rail (≈26vw cap 440)
+ * and a usable editor column.
+ */
+export function tutorWidthUpperBoundPx(viewportWidth: number): number {
+  const vw = Math.floor(viewportWidth)
+  if (!Number.isFinite(vw) || vw < 640) {
+    return TUTOR_WIDTH_MIN
+  }
+  const problemSide = Math.min(440, Math.ceil(vw * 0.26))
+  const minCenterEditor = 280
+  const slack = 24
+  const raw = vw - problemSide - minCenterEditor - slack
   return Math.round(
-    Math.min(TUTOR_WIDTH_MAX, Math.max(TUTOR_WIDTH_MIN, n)),
+    Math.max(TUTOR_WIDTH_MIN, Math.min(TUTOR_WIDTH_ABS_MAX, raw)),
   )
+}
+
+export function clampTutorWidth(n: number, viewportWidth?: number): number {
+  if (!Number.isFinite(n)) return TUTOR_WIDTH_DEFAULT
+  const vw =
+    viewportWidth ??
+    (typeof window !== 'undefined' ? window.innerWidth : 1920)
+  const maxPx = tutorWidthUpperBoundPx(vw)
+  return Math.round(Math.min(maxPx, Math.max(TUTOR_WIDTH_MIN, n)))
 }
 
 export function clampConsoleHeight(n: number, maxPx: number): number {
@@ -45,12 +69,17 @@ export function loadTutorWidth(): number {
   if (!canUseStorage()) return TUTOR_WIDTH_DEFAULT
   const raw = localStorage.getItem(LS_TUTOR_WIDTH)
   const n = raw == null ? NaN : Number.parseInt(raw, 10)
-  return clampTutorWidth(Number.isFinite(n) ? n : TUTOR_WIDTH_DEFAULT)
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1920
+  return clampTutorWidth(
+    Number.isFinite(n) ? n : TUTOR_WIDTH_DEFAULT,
+    vw,
+  )
 }
 
 export function saveTutorWidth(px: number): void {
   if (!canUseStorage()) return
-  localStorage.setItem(LS_TUTOR_WIDTH, String(clampTutorWidth(px)))
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1920
+  localStorage.setItem(LS_TUTOR_WIDTH, String(clampTutorWidth(px, vw)))
 }
 
 export function loadConsoleHeight(): number {

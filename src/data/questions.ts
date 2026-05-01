@@ -14,7 +14,7 @@ export const challenges: Challenge[] = [
     conceptExplanation:
       'A closure is an inner function that "remembers" variables from the outer function even after the outer function has returned. That memory is how you can keep a private counter without globals or classes.',
     prompt:
-      'Implement `createCounter()`. It should return a function. Each time you call that returned function, it increments an internal count and returns the NEW value. The very first call must return `1`, the second `2`, and so on. A fresh `createCounter()` starts again from `1`.',
+      'Implement **createCounter()**. It should return a function. Each time you call that returned function, it increments an internal count and returns the NEW value. The very first call must return **1**, the second **2**, and so on. A fresh **createCounter()** starts again from **1**.',
     examples: [
       'const c = createCounter(); c(); // 1',
       'c(); c(); // then 2, then 3',
@@ -22,7 +22,7 @@ export const challenges: Challenge[] = [
     ],
     constraints: [
       'Do not use a global variable for the count.',
-      'Each `createCounter()` instance has its own independent count.',
+      'Each **createCounter()** instance has its own independent count.',
       'First returned value from a new counter is always 1.',
     ],
     expectedBehavior:
@@ -40,7 +40,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'The inner function closes over `n`; each invocation mutates the same `n` for that factory call.',
+      'The inner function closes over **n**; each invocation mutates the same **n** for that factory call.',
     testCases: [
       {
         name: 'first call returns 1',
@@ -77,17 +77,17 @@ export const challenges: Challenge[] = [
     conceptExplanation:
       'Debouncing schedules a function to run only after calls have "quieted" for a period. Bursts of events collapse into one trailing execution.',
     prompt:
-      'Implement `debounce(fn, waitMs)`. Return a new function that, when called repeatedly, only invokes `fn` after `waitMs` ms have passed without another call. Pass the latest arguments to `fn`.',
+      'Implement **debounce(fn, waitMs)**. Return a new function that, when called repeatedly, only invokes **fn** after **waitMs** ms have passed without another call. Pass the latest arguments to **fn**.',
     examples: [
       'Search box: user types fast; you only query after they pause.',
       'Window resize: fire layout once after resizing stops.',
     ],
     constraints: [
-      '`fn` should receive the same `this` as the debounced wrapper (if relevant) and latest arguments.',
+      '**fn** should receive the same **this** as the debounced wrapper (if relevant) and latest arguments.',
       'Use trailing-edge debouncing (standard interview version).',
     ],
     expectedBehavior:
-      'If you call the debounced function many times within `waitMs`, `fn` runs once after the last call.',
+      'If you call the debounced function many times within **waitMs**, **fn** runs once after the last call.',
     starterCode: `function debounce(fn, waitMs) {
   // your code
 }
@@ -141,9 +141,9 @@ export const challenges: Challenge[] = [
     functionName: 'shallowEqual',
     tags: ['objects'],
     conceptExplanation:
-      'Shallow equality: same own keys and each paired value is `===`. Nested objects compare by reference only.',
+      'Shallow equality: same own keys and each paired value is **===**. Nested objects compare by reference only.',
     prompt:
-      'Implement `shallowEqual(a, b)` for plain objects: same set of keys (order ignored) and `===` for values.',
+      'Implement **shallowEqual(a, b)** for plain objects: same set of keys (order ignored) and **===** for values.',
     examples: [
       'shallowEqual({a:1},{a:1}) → true',
       'shallowEqual({a:1,b:2},{b:2,a:1}) → true',
@@ -164,7 +164,7 @@ export const challenges: Challenge[] = [
   }
   return true
 }`,
-    explanation: 'Compare key counts then each key with `===`.',
+    explanation: 'Compare key counts then each key with **===**.',
     testCases: [
       {
         name: 'same shape and values',
@@ -194,7 +194,7 @@ export const challenges: Challenge[] = [
     conceptExplanation:
       'Pub/sub: listeners register per event string; emit fans out arguments; off removes a handler by reference.',
     prompt:
-      'Implement `createEmitter()` returning `{ on, off, emit }` as specified.',
+      'Implement **createEmitter()** returning **{ on, off, emit }** as specified.',
     examples: ['on("click", fn); emit("click", 1, 2);'],
     constraints: ['Handlers run in registration order.'],
     expectedBehavior: 'off removes only the same function reference once.',
@@ -223,7 +223,7 @@ export const challenges: Challenge[] = [
     },
   }
 }`,
-    explanation: 'Store handlers per event in an array; filter on `off`; iterate on `emit`.',
+    explanation: 'Store handlers per event in an array; filter on **off**; iterate on **emit**.',
     testCases: [
       {
         name: 'on and emit',
@@ -273,10 +273,10 @@ export const challenges: Challenge[] = [
     conceptExplanation:
       'Bounded concurrency pool: workers pull the next task index until done; results stay in input order.',
     prompt:
-      'Implement `runPool(tasks, limit)` for `tasks: Array<() => Promise<T>>`. At most `limit` run at once; return `Promise<T[]>` in task order.',
+      'Implement **runPool(tasks, limit)** for **tasks: Array<() => Promise<T>>**. At most **limit** run at once; return **Promise<T[]>** in task order.',
     examples: ['Useful for download queues with max parallel requests.'],
     constraints: ['Preserve output order by original index.'],
-    expectedBehavior: 'Correct ordered array; concurrency capped by `limit`.',
+    expectedBehavior: 'Correct ordered array; concurrency capped by **limit**.',
     starterCode: `async function runPool(tasks, limit) {
   // your code
 }`,
@@ -339,11 +339,11 @@ export const challenges: Challenge[] = [
     functionName: 'helloWorld',
     tags: ['fundamentals'],
     conceptExplanation:
-      'The smallest working program proves your environment runs code and returns a value from a function. Interviewers use it to verify you understand `return` and string literals before moving to harder problems.',
+      'The smallest working program proves your environment runs code and returns a value from a function. Interviewers use it to verify you understand **return** and string literals before moving to harder problems.',
     prompt:
-      'Implement `helloWorld()` so it always returns exactly the string `"Hello, World!"`.',
+      'Implement **helloWorld()** so it always returns exactly the string **"Hello, World!"**.',
     examples: ['helloWorld() → "Hello, World!"'],
-    constraints: ['Do not print to the console; use `return`.'],
+    constraints: ['Do not print to the console; use **return**.'],
     expectedBehavior: 'Always the same string literal.',
     starterCode: `function helloWorld() {
 }
@@ -388,12 +388,12 @@ export const challenges: Challenge[] = [
     functionName: 'getType',
     tags: ['fundamentals', 'typeof'],
     conceptExplanation:
-      '`typeof` is the built-in way to query a value’s runtime category. Pair it with checks for `null` and arrays because JavaScript keeps historical quirks (`typeof null === "object"`), so interviewers expect you to show those edge cases explicitly.',
+      '**typeof** is the built-in way to query a value’s runtime category. Pair it with checks for **null** and arrays because JavaScript keeps historical quirks (**typeof null === "object"**), so interviewers expect you to show those edge cases explicitly.',
     prompt:
-      'Implement `getType(value)`. Return `"null"` for `null`. Return `"array"` for arrays. For all other values, return the same string that `typeof value` would produce (`"string"`, `"number"`, `"boolean"`, `"undefined"`, `"function"`, `"bigint"`, `"symbol"`, or `"object"` for non-null non-array objects).',
+      'Implement **getType(value)**. Return **"null"** for **null**. Return **"array"** for arrays. For all other values, return the same string that **typeof value** would produce (**"string"**, **"number"**, **"boolean"**, **"undefined"**, **"function"**, **"bigint"**, **"symbol"**, or **"object"** for non-null non-array objects).',
     examples: ['getType(null) → "null"', 'getType([1]) → "array"'],
-    constraints: ['Use `Array.isArray` to detect arrays.'],
-    expectedBehavior: 'Finer than raw `typeof` for null and arrays.',
+    constraints: ['Use **Array.isArray** to detect arrays.'],
+    expectedBehavior: 'Finer than raw **typeof** for null and arrays.',
     starterCode: `function getType(value) {
 }
 `,
@@ -404,7 +404,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'Handle `null` and arrays first, then delegate to `typeof` for every other runtime value.',
+      'Handle **null** and arrays first, then delegate to **typeof** for every other runtime value.',
     testCases: [
       {
         name: 'null is not typeof object only',
@@ -449,9 +449,9 @@ export const challenges: Challenge[] = [
     functionName: 'calculate',
     tags: ['fundamentals', 'operators'],
     conceptExplanation:
-      'Basic arithmetic and remainder underpin indexing, pagination, and hashing. In JavaScript, division is floating point and `%` yields the remainder (with sign following the dividend).',
+      'Basic arithmetic and remainder underpin indexing, pagination, and hashing. In JavaScript, division is floating point and **%** yields the remainder (with sign following the dividend).',
     prompt:
-      'Implement `calculate(a, b, op)` where `op` is one of `"+"`, `"-"`, `"*"`, `"/"`, `"%"`. Return `NaN` when `op` is anything else.',
+      'Implement **calculate(a, b, op)** where **op** is one of **"+"**, **"-"**, **"*"**, **"/"**, **"%"**. Return **NaN** when **op** is anything else.',
     examples: ['calculate(10, 3, "%") → 1'],
     constraints: ['Do not use eval or Function constructor for this task.'],
     expectedBehavior: 'Regular JavaScript arithmetic semantics.',
@@ -476,7 +476,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'Branch on `op` with `switch` and return `NaN` for unknown operators.',
+      'Branch on **op** with **switch** and return **NaN** for unknown operators.',
     testCases: [
       {
         name: 'add',
@@ -518,7 +518,7 @@ export const challenges: Challenge[] = [
     conceptExplanation:
       'Pure helper functions return the same output for the same inputs, which makes them trivial to test. String composition is a staple of front-end take-homes before you add network or state.',
     prompt:
-      'Implement `greet(name)`. Return `"Hello, "` + name + `"!"`. If `name` is an empty string, return `"Hello there!"` instead.',
+      'Implement **greet(name)**. Return **"Hello, "** + name + **"!"**. If **name** is an empty string, return **"Hello there!"** instead.',
     examples: ['greet("Lee") → "Hello, Lee!"', 'greet("") → "Hello there!"'],
     constraints: ['Do not mutate the input.', 'Time O(1).'],
     expectedBehavior: 'Straightforward string result.',
@@ -531,7 +531,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'Return a special string for `""`, otherwise concatenate the literal greeting with the name.',
+      'Return a special string for **""**, otherwise concatenate the literal greeting with the name.',
     testCases: [
       {
         name: 'regular name',
@@ -566,9 +566,9 @@ export const challenges: Challenge[] = [
     functionName: 'swapValues',
     tags: ['fundamentals', 'scope'],
     conceptExplanation:
-      'Modern `let`/`const` are block-scoped, avoiding `var` hoisting surprises. Returning `[b, a]` models a swap without mutable references, which matches how interviewers want you to explain simple data movement.',
+      'Modern **let**/**const** are block-scoped, avoiding **var** hoisting surprises. Returning **[b, a]** models a swap without mutable references, which matches how interviewers want you to explain simple data movement.',
     prompt:
-      'Implement `swapValues(a, b)` that returns a new array `[b, a]` (the two values in reverse order).',
+      'Implement **swapValues(a, b)** that returns a new array **[b, a]** (the two values in reverse order).',
     examples: ['swapValues(10, 20) → [20, 10]'],
     constraints: ['Do not use global variables.'],
     expectedBehavior: 'Preserves value types (numbers, strings, etc.).',
@@ -579,7 +579,7 @@ export const challenges: Challenge[] = [
   return [b, a]
 }
 `,
-    explanation: 'Return a literal array with `b` then `a`.',
+    explanation: 'Return a literal array with **b** then **a**.',
     testCases: [
       {
         name: 'two numbers',
@@ -616,7 +616,7 @@ export const challenges: Challenge[] = [
     conceptExplanation:
       'Threshold rules map numeric scores to letter bands. Checking from the top score downward keeps every boundary inclusive without off-by-one fights or duplicate matches.',
     prompt:
-      'Implement `classify(score)` for numbers 0–100: `"A"` if ≥90, `"B"` if ≥80, `"C"` if ≥70, `"D"` if ≥60, else `"F"`. If `score` is outside `[0, 100]`, return `"invalid"`.',
+      'Implement **classify(score)** for numbers 0–100: **"A"** if ≥90, **"B"** if ≥80, **"C"** if ≥70, **"D"** if ≥60, else **"F"**. If **score** is outside **[0, 100]**, return **"invalid"**.',
     examples: ['classify(88) → "B"', 'classify(59) → "F"'],
     constraints: ['Boundaries are inclusive per band.'],
     expectedBehavior: 'Deterministic grading string.',
@@ -673,11 +673,11 @@ export const challenges: Challenge[] = [
     functionName: 'dayName',
     tags: ['fundamentals', 'switch'],
     conceptExplanation:
-      '`switch` compares one expression against many discrete cases. It is easy to read for enumerations like weekday numbers or HTTP status classes when each branch is independent.',
+      '**switch** compares one expression against many discrete cases. It is easy to read for enumerations like weekday numbers or HTTP status classes when each branch is independent.',
     prompt:
-      'Implement `dayName(n)` where integer `n` is 1–7 meaning Monday through Sunday. Return `"Mon"`, `"Tue"`, `"Wed"`, `"Thu"`, `"Fri"`, `"Sat"`, `"Sun"` respectively. Otherwise return `"???"`.',
+      'Implement **dayName(n)** where integer **n** is 1–7 meaning Monday through Sunday. Return **"Mon"**, **"Tue"**, **"Wed"**, **"Thu"**, **"Fri"**, **"Sat"**, **"Sun"** respectively. Otherwise return **"???"**.',
     examples: ['dayName(2) → "Tue"'],
-    constraints: ['Do not use `Date` or locale APIs.'],
+    constraints: ['Do not use **Date** or locale APIs.'],
     expectedBehavior: 'Fixed mapping only.',
     starterCode: `function dayName(n) {
 }
@@ -703,7 +703,7 @@ export const challenges: Challenge[] = [
   }
 }
 `,
-    explanation: 'Use `switch` with `default` for invalid numbers.',
+    explanation: 'Use **switch** with **default** for invalid numbers.',
     testCases: [
       {
         name: 'Monday',
@@ -738,9 +738,9 @@ export const challenges: Challenge[] = [
     functionName: 'sumRange',
     tags: ['fundamentals', 'loops'],
     conceptExplanation:
-      'A `for` loop accumulates a running total across an inclusive range. That pattern generalizes to sliding windows, prefix sums, and simulations where you cannot jump straight to a closed-form formula.',
+      'A **for** loop accumulates a running total across an inclusive range. That pattern generalizes to sliding windows, prefix sums, and simulations where you cannot jump straight to a closed-form formula.',
     prompt:
-      'Implement `sumRange(n)` returning the sum of integers from `1` through `n` inclusive. If `n` <= 0, return `0`.',
+      'Implement **sumRange(n)** returning the sum of integers from **1** through **n** inclusive. If **n** <= 0, return **0**.',
     examples: ['sumRange(4) → 10'],
     constraints: ['Use a loop; O(n) time is fine.'],
     expectedBehavior: 'Integer sum in 32-bit safe range for inputs used here.',
@@ -755,7 +755,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'Guard non-positive `n`, then add every index from 1 to `n` with a loop.',
+      'Guard non-positive **n**, then add every index from 1 to **n** with a loop.',
     testCases: [
       {
         name: 'one',
@@ -795,9 +795,9 @@ export const challenges: Challenge[] = [
     functionName: 'secondLargest',
     tags: ['arrays'],
     conceptExplanation:
-      'Searching an array asks you to compare elements while tracking running extrema. Watching for duplicates (`largest === second`) and short arrays separates toy examples from realistic interview variants.',
+      'Searching an array asks you to compare elements while tracking running extrema. Watching for duplicates (**largest === second**) and short arrays separates toy examples from realistic interview variants.',
     prompt:
-      'Implement `secondLargest(nums)`, an array of numbers. Return the second largest **distinct** value, or `-Infinity` if it does not exist (empty array or all elements equal one value).',
+      'Implement **secondLargest(nums)**, an array of numbers. Return the second largest **distinct** value, or **-Infinity** if it does not exist (empty array or all elements equal one value).',
     examples: ['secondLargest([3, 1, 4, 4]) → 3', 'secondLargest([5, 5]) → -Infinity'],
     constraints: ['Do not mutate the input array.', 'O(n) single pass preferred.'],
     expectedBehavior:
@@ -820,7 +820,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'Track the largest and second-largest on one pass, updating `second` only when a new value is strictly between them.',
+      'Track the largest and second-largest on one pass, updating **second** only when a new value is strictly between them.',
     testCases: [
       {
         name: 'distinct second',
@@ -860,11 +860,11 @@ export const challenges: Challenge[] = [
     functionName: 'safeParse',
     tags: ['errors'],
     conceptExplanation:
-      '`JSON.parse` throws when a string is not valid JSON. Production code catches that failure instead of terminating the caller, supplying a sentinel or configurable fallback.',
+      '**JSON.parse** throws when a string is not valid JSON. Production code catches that failure instead of terminating the caller, supplying a sentinel or configurable fallback.',
     prompt:
-      'Implement `safeParse(jsonString, fallback)`. Try `JSON.parse(jsonString)`. If parsing succeeds, return the result. On any thrown error return `fallback`.',
-    examples: [`safeParse("broken", []) → []`],
-    constraints: ['Do not propagate parse errors outward.', '`fallback` may be any value.'],
+      'Implement **safeParse(jsonString, fallback)**. Try **JSON.parse(jsonString)**. If parsing succeeds, return the result. On any thrown error return **fallback**.',
+    examples: ['**safeParse("broken", [])** → []'],
+    constraints: ['Do not propagate parse errors outward.', '**fallback** may be any value.'],
     expectedBehavior:
       'Valid JSON returns parsed primitives or objects.',
     starterCode: `function safeParse(jsonString, fallback) {
@@ -879,7 +879,7 @@ export const challenges: Challenge[] = [
 }
 `,
     explanation:
-      'Catch any exception from `JSON.parse` and return the provided fallback atomically.',
+      'Catch any exception from **JSON.parse** and return the provided fallback atomically.',
     testCases: [
       {
         name: 'parses object',
@@ -920,11 +920,11 @@ export const challenges: Challenge[] = [
     functionName: 'divide',
     tags: ['errors'],
     conceptExplanation:
-      'Arithmetic division by zero yields `Infinity`, but business rules often forbid it entirely—throw so upstream code can differentiate invalid inputs from numerical limits.',
+      'Arithmetic division by zero yields **Infinity**, but business rules often forbid it entirely—throw so upstream code can differentiate invalid inputs from numerical limits.',
     prompt:
-      'Implement `divide(a, b)`. If `b === 0` throw `new Error("division by zero")`. Otherwise return `a / b`.',
+      'Implement **divide(a, b)**. If **b === 0** throw **new Error("division by zero")**. Otherwise return **a / b**.',
     examples: ['divide(-8, 2) → -4'],
-    constraints: ['Use the JavaScript `Error` class.', '`a`/`b` are numbers here.'],
+    constraints: ['Use the JavaScript **Error** class.', '**a**/**b** are numbers here.'],
     expectedBehavior: 'Propagates typed error on forbidden divisor.',
     starterCode: `function divide(a, b) {
 }
@@ -934,7 +934,7 @@ export const challenges: Challenge[] = [
   return a / b
 }
 `,
-    explanation: 'Check the divisor before using `/`; throw with the prescribed message.',
+    explanation: 'Check the divisor before using **/**; throw with the prescribed message.',
     testCases: [
       {
         name: 'quotient',
@@ -970,9 +970,9 @@ export const challenges: Challenge[] = [
     functionName: 'formatName',
     tags: ['strings'],
     conceptExplanation:
-      'Template literals wrap expressions in `${}` so you can format without manual string concatenation. Different missing-name cases are common in forms and must return tidy output.',
+      'Template literals wrap expressions in **${}** so you can format without manual string concatenation. Different missing-name cases are common in forms and must return tidy output.',
     prompt:
-      'Implement `formatName(first, last)` using a template literal when both strings are nonempty. Return LAST, FIRST with a comma and single space between names. If both are empty return a single dash character. If LAST is empty return FIRST only. If FIRST is empty return LAST only.',
+      'Implement **formatName(first, last)** using a template literal when both strings are nonempty. Return LAST, FIRST with a comma and single space between names. If both are empty return a single dash character. If LAST is empty return FIRST only. If FIRST is empty return LAST only.',
     examples: [
       'formatName with both names puts last name before the comma.',
       'formatName when only one side is populated returns that side alone.',
@@ -1024,9 +1024,9 @@ export const challenges: Challenge[] = [
     functionName: 'multiply',
     tags: ['functions'],
     conceptExplanation:
-      'Concise arrows `(a,b) => expr` avoid `function` verbosity and implicitly return when no braces wrap the expression body.',
+      'Concise arrows **(a,b) => expr** avoid **function** verbosity and implicitly return when no braces wrap the expression body.',
     prompt:
-      'Assign `multiply` using an arrow function with concise body multiplying its two numeric parameters.',
+      'Assign **multiply** using an arrow function with concise body multiplying its two numeric parameters.',
     examples: ['multiply(6, 7) → 42'],
     constraints: [
       'Declare with const and an arrow.',
@@ -1038,7 +1038,7 @@ export const challenges: Challenge[] = [
 `,
     solutionCode: `const multiply = (a, b) => a * b
 `,
-    explanation: '`const multiply = (a, b) => a * b` keeps multiplication as a reusable expression-bodied arrow.',
+    explanation: '**const multiply = (a, b) => a * b** keeps multiplication as a reusable expression-bodied arrow.',
     testCases: [
       {
         name: 'product',
@@ -1073,11 +1073,11 @@ export const challenges: Challenge[] = [
     functionName: 'daysBetween',
     tags: ['dates'],
     conceptExplanation:
-      'Deterministic comparisons need explicit UTC construction with `Date.UTC` instead of handing hyphenated date-only strings to `new Date`, where implicit local timezone conversion can shift the calendar day.',
+      'Deterministic comparisons need explicit UTC construction with **Date.UTC** instead of handing hyphenated date-only strings to **new Date**, where implicit local timezone conversion can shift the calendar day.',
     prompt:
-      'Implement `daysBetween(isoStart, isoEnd)` when both operands are ISO date-only strings with four-digit year, two-digit month, and two-digit day separated by hyphens. Interpret each calendar day as UTC midnight using `Date.UTC`. Return the nonnegative whole-day difference. Tests always use an `isoEnd` on or after `isoStart`.',
+      'Implement **daysBetween(isoStart, isoEnd)** when both operands are ISO date-only strings with four-digit year, two-digit month, and two-digit day separated by hyphens. Interpret each calendar day as UTC midnight using **Date.UTC**. Return the nonnegative whole-day difference. Tests always use an **isoEnd** on or after **isoStart**.',
     examples: ["daysBetween('2024-01-01','2024-01-08') → 7"],
-    constraints: ['No `Date.now()` or `new Date()` without fixed parts.', 'Use `Date.UTC` for construction.'],
+    constraints: ['No **Date.now()** or **new Date()** without fixed parts.', 'Use **Date.UTC** for construction.'],
     expectedBehavior: 'Exact day delta on UTC line.',
     starterCode: `function daysBetween(isoStart, isoEnd) {
 }
@@ -1093,7 +1093,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Split ISO parts, build UTC millis with `Date.UTC`, subtract, divide by one day of milliseconds.',
+      'Split ISO parts, build UTC millis with **Date.UTC**, subtract, divide by one day of milliseconds.',
     testCases: [
       {
         name: 'week span',
@@ -1128,10 +1128,10 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'isValidEmail',
     tags: ['regexp'],
     conceptExplanation:
-      'The `RegExp#test` method answers yes/no without allocating match arrays. Practically you trade strict RFC compliance for small regexes that catch obvious typos.',
+      'The **RegExp#test** method answers yes/no without allocating match arrays. Practically you trade strict RFC compliance for small regexes that catch obvious typos.',
     prompt:
-      'Implement `isValidEmail(s)` using `/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/` so there is one `@`, no whitespace, and a dot after `@`.',
-    examples: [`isValidEmail("user@host.com") → true`],
+      'Implement **isValidEmail(s)** using **/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/** so there is one **@**, no whitespace, and a dot after **@**.',
+    examples: ['**isValidEmail("user@host.com")** → true'],
     constraints: ['Use exactly that pattern (escape backslashes so the regex compiles).'],
     expectedBehavior: 'Boolean result only.',
     starterCode: `function isValidEmail(s) {
@@ -1141,7 +1141,7 @@ function daysBetween(isoStart, isoEnd) {
   return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(s)
 }
 `,
-    explanation: 'Compile the pattern as a regex literal and call `.test` on `s`.',
+    explanation: 'Compile the pattern as a regex literal and call **.test** on **s**.',
     testCases: [
       {
         name: 'simple valid',
@@ -1174,11 +1174,11 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'extractNumbers',
     tags: ['regexp'],
     conceptExplanation:
-      'Global `match` returns every substring matching `\\d+`; mapping with `Number` converts them to numeric values for downstream math.',
+      'Global **match** returns every substring matching **\\d+**; mapping with **Number** converts them to numeric values for downstream math.',
     prompt:
-      'Implement `extractNumbers(text)` returning an array of numbers parsed from each contiguous digit run in order. If there are no digits return `[]`.',
+      'Implement **extractNumbers(text)** returning an array of numbers parsed from each contiguous digit run in order. If there are no digits return **[]**.',
     examples: ['extractNumbers("a1b23c") → [1, 23]'],
-    constraints: ['Use `String.prototype.match` with `/\\d+/g`.', 'Do not use `eval`.'],
+    constraints: ['Use **String.prototype.match** with **/\\d+/g**.', 'Do not use **eval**.'],
     expectedBehavior:
       'Numbers, not digit strings.',
     starterCode: `function extractNumbers(text) {
@@ -1190,7 +1190,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Optional-chain `match`; map digit strings via `Number` or unary `+`.',
+      'Optional-chain **match**; map digit strings via **Number** or unary **+**.',
     testCases: [
       {
         name: 'mixed text',
@@ -1225,9 +1225,9 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'replaceVowels',
     tags: ['regexp'],
     conceptExplanation:
-      '`String.prototype.replace` with a regex `/[aeiou]/gi` and a replacing function lets you capitalize per match or substitute symbols without manual loops.',
+      '**String.prototype.replace** with a regex **/[aeiou]/gi** and a replacing function lets you capitalize per match or substitute symbols without manual loops.',
     prompt:
-      'Implement `replaceVowels(str)` replacing every vowel (`a`,`e`,`i`,`o`,`u`, any case) with `"*"`.',
+      'Implement **replaceVowels(str)** replacing every vowel (**a**,**e**,**i**,**o**,**u**, any case) with **"*"**.',
     examples: ['replaceVowels("Ace") → "*c*"'],
     constraints: ['Case-insensitive vowel detection.', 'Do not mutate the original argument (return new string).'],
     expectedBehavior: 'Preserves consonants unchanged.',
@@ -1239,7 +1239,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Use a regex with `gi` flags so every vowel swaps to asterisk.',
+      'Use a regex with **gi** flags so every vowel swaps to asterisk.',
     testCases: [
       {
         name: 'mixed case',
@@ -1275,9 +1275,9 @@ function daysBetween(isoStart, isoEnd) {
     conceptExplanation:
       'Returning a nested function proves you understand lexical scope: the outer factory can stash constants (like the greeting) while callers keep calling the lightweight inner thunk.',
     prompt:
-      'Implement `createHelloWorld(arguments)` which ignores its arguments entirely and returns a new function `f`. Calling `f` any number of times must always return the exact string `"Hello World"`.',
+      'Implement **createHelloWorld(arguments)** which ignores its arguments entirely and returns a new function **f**. Calling **f** any number of times must always return the exact string **"Hello World"**.',
     examples: ['const f = createHelloWorld([], 123); f() → "Hello World"'],
-    constraints: ['The returned value must strictly equal the string literal `"Hello World"`.'],
+    constraints: ['The returned value must strictly equal the string literal **"Hello World"**.'],
     expectedBehavior:
       'Ignore inputs; deterministic inner function.',
     starterCode: `function createHelloWorld() {
@@ -1288,7 +1288,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Return `() => "Hello World"` from the factory—the arguments to the factory simply go unused.',
+      'Return **() => "Hello World"** from the factory—the arguments to the factory simply go unused.',
     testCases: [
       {
         name: 'callable many times',
@@ -1323,13 +1323,13 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'createCounterII',
     tags: ['closures'],
     conceptExplanation:
-      'Instead of anonymous increments, richer counters expose verbs (`increment`, `decrement`, `reset`) returning the mutated total each time—a pattern that maps to banking ledgers or undo stacks.',
+      'Instead of anonymous increments, richer counters expose verbs (**increment**, **decrement**, **reset**) returning the mutated total each time—a pattern that maps to banking ledgers or undo stacks.',
     prompt:
-      'Implement `createCounterII(init)` returning `{ increment, decrement, reset }`. `increment` raises the internal count by 1 each call (return after change). `decrement` subtracts 1 each call (return after change). `reset` restores the stored initial value snapshot (also return current value equal to snapshot). Calls apply in serial order.',
+      'Implement **createCounterII(init)** returning **{ increment, decrement, reset }**. **increment** raises the internal count by 1 each call (return after change). **decrement** subtracts 1 each call (return after change). **reset** restores the stored initial value snapshot (also return current value equal to snapshot). Calls apply in serial order.',
     examples: ['init=-2; increment → -1 → increment → reset → matches init'],
     constraints: ['Internal state hides between method calls.', 'Each method returns fresh current value.'],
     expectedBehavior:
-      '`reset` restores the ORIGINAL numeric `init`.',
+      '**reset** restores the ORIGINAL numeric **init**.',
     starterCode: `function createCounterII(init) {
 }
 `,
@@ -1351,7 +1351,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Close over `init` baseline plus mutable `n`. Use prefix ++/-- helpers and reset by copying baseline.',
+      'Close over **init** baseline plus mutable **n**. Use prefix ++/-- helpers and reset by copying baseline.',
     testCases: [
       {
         name: 'increment chain',
@@ -1402,11 +1402,11 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'argumentsLength',
     tags: ['functions'],
     conceptExplanation:
-      'Variadic arity is expressed with rest parameters `(…args)`. Their `.length` property answers how many positional arguments callers supplied—critical for decorators and wrappers.',
+      'Variadic arity is expressed with rest parameters **(…args)**. Their **.length** property answers how many positional arguments callers supplied—critical for decorators and wrappers.',
     prompt:
-      'Implement `argumentsLength` as a callable that returns how many explicit arguments were received (similar to accessing `arguments.length` but expressed with rest syntax). Example: `(1, 2)` → `2`; none → `0`.',
+      'Implement **argumentsLength** as a callable that returns how many explicit arguments were received (similar to accessing **arguments.length** but expressed with rest syntax). Example: **(1, 2)** → **2**; none → **0**.',
     examples: ['argumentsLength(5, undefined, {}, [] ) → 4'],
-    constraints: ['Use rest parameter syntax internally.', '`null`/`undefined` counts as an argument slot.'],
+    constraints: ['Use rest parameter syntax internally.', '**null**/**undefined** counts as an argument slot.'],
     expectedBehavior:
       'Equal to arity count including holes via explicit undefined?',
     starterCode: `function argumentsLength(...args) {
@@ -1444,11 +1444,11 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'transformEach',
     tags: ['arrays'],
     conceptExplanation:
-      'Higher-order iterators pass both element and index so you can build derived arrays without imperative loops. Mirrors `Array.prototype.map` but implemented manually for mastery.',
+      'Higher-order iterators pass both element and index so you can build derived arrays without imperative loops. Mirrors **Array.prototype.map** but implemented manually for mastery.',
     prompt:
-      'Implement `transformEach(arr, fn)` returning a NEW array whose each index equals `fn(arr[i], i)` for indices `i` from `0` to `length-1`. Treat `fn` synchronously.',
+      'Implement **transformEach(arr, fn)** returning a NEW array whose each index equals **fn(arr[i], i)** for indices **i** from **0** to **length-1**. Treat **fn** synchronously.',
     examples: ['transformEach([10,20], (_, i) => i) → [0,1]'],
-    constraints: ['Do not mutate `arr`.'],
+    constraints: ['Do not mutate **arr**.'],
     expectedBehavior:
       'Preserves length and index order.',
     starterCode: `function transformEach(arr, fn) {
@@ -1463,7 +1463,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Loop indices, accumulate results derived from `(value,index)` pushes.',
+      'Loop indices, accumulate results derived from **(value,index)** pushes.',
     testCases: [
       {
         name: 'double indexes',
@@ -1500,9 +1500,9 @@ function daysBetween(isoStart, isoEnd) {
     conceptExplanation:
       'Filtering keeps elements where a predicate evaluates truthy—a pattern used before map/reduce pipelines in data prep.',
     prompt:
-      'Implement `keepIf(arr, predicate)` returning a shallow copy array containing ONLY elements where `predicate(value, index)` equals truthy. Preserve original order.',
-    examples: [`keepIf([1, 2], (n) => n % 2) → [1]`],
-    constraints: ['Do not call built-in `.filter`; write your loop.'],
+      'Implement **keepIf(arr, predicate)** returning a shallow copy array containing ONLY elements where **predicate(value, index)** equals truthy. Preserve original order.',
+    examples: ['**keepIf([1, 2], (n) => n % 2)** → [1]'],
+    constraints: ['Do not call built-in **.filter**; write your loop.'],
     expectedBehavior:
       'Skips falsy predicate outcomes.',
     starterCode: `function keepIf(arr, predicate) {
@@ -1551,11 +1551,11 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'foldLeft',
     tags: ['arrays'],
     conceptExplanation:
-      '`reduce` folds a collection into one accumulator by iterating left-to-right with a seed value—basis for totals, parsers, pipelines.',
+      '**reduce** folds a collection into one accumulator by iterating left-to-right with a seed value—basis for totals, parsers, pipelines.',
     prompt:
-      'Implement `foldLeft(arr, reducer, initial)` starting `acc = initial` then sequentially `acc = reducer(acc, arr[i], i)` across every element.',
-    examples: [`foldLeft([1,2,3], (a,x)=>a+x, 0) → 6`],
-    constraints: ['Do not mutate `initial` when it references objects unless reducer does.'],
+      'Implement **foldLeft(arr, reducer, initial)** starting **acc = initial** then sequentially **acc = reducer(acc, arr[i], i)** across every element.',
+    examples: ['**foldLeft([1,2,3], (a,x)=>a+x, 0)** → 6'],
+    constraints: ['Do not mutate **initial** when it references objects unless reducer does.'],
     expectedBehavior:
       'Processes entire array sequentially.',
     starterCode: `function foldLeft(arr, reducer, initial) {
@@ -1605,11 +1605,11 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'composeFuncs',
     tags: ['functional'],
     conceptExplanation:
-      'Functional composition nests calls so intermediate values flow sequentially. Many libraries evaluate the rightmost transformer first (`f ∘ g`(x)=f(g(x))), matching how UNIX pipes read left-to-right mentally but execute inner-to-outer mathematically.',
+      'Functional composition nests calls so intermediate values flow sequentially. Many libraries evaluate the rightmost transformer first (**f ∘ g**(x)=f(g(x))), matching how UNIX pipes read left-to-right mentally but execute inner-to-outer mathematically.',
     prompt:
-      'Implement `composeFuncs(fns)` returning `(x)=>...` evaluating the provided unary functions RIGHTMOST-FIRST: `[f,g,h]` ⇒ `(...args)=>f(g(h(...args)))`. If `fns` is empty return the identity unary function `(x)=>x`.',
-    examples: [`composeFuncs([(y)=>y*y,(y)=>y+1])(5) ⇒ 36`],
-    constraints: ['Do not mutate `fns`.'],
+      'Implement **composeFuncs(fns)** returning **(x)=>...** evaluating the provided unary functions RIGHTMOST-FIRST: **[f,g,h]** ⇒ **(...args)=>f(g(h(...args)))**. If **fns** is empty return the identity unary function **(x)=>x**.',
+    examples: ['**composeFuncs([(y)=>y*y,(y)=>y+1])(5)** ⇒ 36'],
+    constraints: ['Do not mutate **fns**.'],
     expectedBehavior:
       ' Unary composition respects listed order ',
     starterCode: `function composeFuncs(fns) {
@@ -1621,7 +1621,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Reuse `reduceRight` so functions apply from outermost inward; empty reducer seed uses initial `x` without calling any transformer.',
+      'Reuse **reduceRight** so functions apply from outermost inward; empty reducer seed uses initial **x** without calling any transformer.',
     testCases: [
       {
         name: 'square after increment',
@@ -1659,13 +1659,13 @@ function daysBetween(isoStart, isoEnd) {
     conceptExplanation:
       'Interview “empty checks” unify strings, arrays, and plain maps: falsy-but-present values like zero should still fail the emptiness heuristic when you only care about length or key cardinality.',
     prompt:
-      'Implement `isEmpty(val)` returning true when ONE of holds: ARRAY case length equals zero OR STRING length equals zero OR plain OBJECT with zero own enumerable string keys. Else return false for these tests.',
+      'Implement **isEmpty(val)** returning true when ONE of holds: ARRAY case length equals zero OR STRING length equals zero OR plain OBJECT with zero own enumerable string keys. Else return false for these tests.',
     examples: [
-      `isEmpty('') is true.`,
-      `isEmpty([99]) must be false because array has elements.`,
+      "**isEmpty('')** is true.",
+      "**isEmpty([99])** must be false because array has elements.",
     ],
     constraints: [
-      `Tests exercise only arrays strings plain objects.`,
+      'Tests exercise only arrays strings plain objects.',
     ],
     expectedBehavior:
       'Do not recurse into nested emptiness.',
@@ -1681,7 +1681,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Separate branches for iterable-like collections versus plain objects keyed by `Object.keys`.',
+      'Separate branches for iterable-like collections versus plain objects keyed by **Object.keys**.',
     testCases: [
       {
         name: 'array empty vs not',
@@ -1723,8 +1723,8 @@ function daysBetween(isoStart, isoEnd) {
     conceptExplanation:
       'Chunking divides a contiguous array into fixed-width slices—common when paging API results where each batch renders together.',
     prompt:
-      'Implement `chunk(arr, size)` where `size>=1`. Return an array of sub-arrays slicing `arr` sequentially; the final slice may contain fewer elements. If `size` invalid return `[]`. Empty input returns `[]`.',
-    examples: [`chunk([1,2,3,4],2) → [[1,2],[3,4]]`],
+      'Implement **chunk(arr, size)** where **size>=1**. Return an array of sub-arrays slicing **arr** sequentially; the final slice may contain fewer elements. If **size** invalid return **[]**. Empty input returns **[]**.',
+    examples: ['**chunk([1,2,3,4],2)** → [[1,2],[3,4]]'],
     constraints: ['Do not mutate the original input array internally (copy slices push).'],
     expectedBehavior:
       'Preserve element order globally.',
@@ -1739,7 +1739,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Iterate with stride `size`, each step `slice`.',
+      'Iterate with stride **size**, each step **slice**.',
     testCases: [
       {
         name: 'even split',
@@ -1774,13 +1774,16 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'last',
     tags: ['arrays'],
     conceptExplanation:
-      'Slice endings model “latest” elements without reversing the sequence—cheap `O(n)` work with immutable copies.',
+      'Slice endings model “latest” elements without reversing the sequence—cheap **O(n)** work with immutable copies.',
     prompt:
-      'Implement `last(arr, n)`. If `n` is absent/undefined but `arr` nonempty return FINAL element ONLY. If `arr` empty return undefined. When `n` provided as positive integer return LAST `n` items (or ENTIRE copy if `n>=arr.length`). If `n` not positive integer return undefined.',
-    examples: [`last([1,2]) → 2`, `last([1,2,3],10).length → 3`],
-    constraints: ['Do not mutate `arr`.'],
+      'Implement **last(arr, n)**. If **n** is absent/undefined but **arr** nonempty return FINAL element ONLY. If **arr** empty return undefined. When **n** provided as positive integer return LAST **n** items (or ENTIRE copy if **n>=arr.length**). If **n** not positive integer return undefined.',
+    examples: [
+      '**last([1,2])** → 2',
+      '**last([1,2,3],10).length** → 3',
+    ],
+    constraints: ['Do not mutate **arr**.'],
     expectedBehavior:
-      'Treat `n===0` as invalid per spec yielding undefined?',
+      'Treat **n===0** as invalid per spec yielding undefined?',
     starterCode: `function last(arr, n) {
 }
 `,
@@ -1792,7 +1795,7 @@ function daysBetween(isoStart, isoEnd) {
 }
 `,
     explanation:
-      'Separate unary vs arity two cases via `arguments.length`/`n===undefined`; use `slice(-n)`.',
+      'Separate unary vs arity two cases via **arguments.length**/**n===undefined**; use **slice(-n)**.',
     testCases: [
       {
         name: 'single scalar',
@@ -1830,9 +1833,9 @@ function daysBetween(isoStart, isoEnd) {
     conceptExplanation:
       'Factory helpers return fresh objects that bundle derived metrics (area, perimeter) so callers keep related numbers together without remembering formulas each time.',
     prompt:
-      'Implement `createRectangle(width, height)` returning a plain object `{ area, perimeter }` with numeric `area = width * height` and `perimeter = 2 * (width + height)`.',
+      'Implement **createRectangle(width, height)** returning a plain object **{ area, perimeter }** with numeric **area = width * height** and **perimeter = 2 * (width + height)**.',
     examples: ['createRectangle(3, 4) ⇒ area 12 perimeter 14'],
-    constraints: ['Do not mutate `width` / `height` inputs.', 'Assume nonnegative numbers per tests.'],
+    constraints: ['Do not mutate **width** / **height** inputs.', 'Assume nonnegative numbers per tests.'],
     expectedBehavior:
       'Computed fields only.',
     starterCode: `function createRectangle(width, height) {
@@ -1883,9 +1886,9 @@ function daysBetween(isoStart, isoEnd) {
     conceptExplanation:
       'Counting objects that match a predicate shows up in analytics filters: iterate, compare a field, increment a running total.',
     prompt:
-      'Implement `countObjects(rows, field, needle)` iterating `rows` (array). Count how many elements are plain objects wherein `field` exists directly on the object and strictly equals (`===`) `needle`.',
+      'Implement **countObjects(rows, field, needle)** iterating **rows** (array). Count how many elements are plain objects wherein **field** exists directly on the object and strictly equals (**===**) **needle**.',
     examples: ['Two records with status ACTIVE out of five total ⇒ 2'],
-    constraints: ['Use `hasOwn` / `hasOwnProperty` for own keys only.', 'Do not throw on non-objects in the array beyond skipping them?.'],
+    constraints: ['Use **hasOwn** / **hasOwnProperty** for own keys only.', 'Do not throw on non-objects in the array beyond skipping them?.'],
     expectedBehavior:
       'Ignore non-objects and objects missing the prop.',
     starterCode: `function countObjects(rows, field, needle) {
@@ -1941,10 +1944,10 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'Animal',
     tags: ['classes'],
     conceptExplanation:
-      'Classes desugar to constructor prototypes; `speak` on the prototype expresses polymorphism cleanly for interview OOP warmup.',
+      'Classes desugar to constructor prototypes; **speak** on the prototype expresses polymorphism cleanly for interview OOP warmup.',
     prompt:
-      'Declare `class Animal` with constructor receiving `species` storing on `this`. Add method `speak()` returning an ES template literal of the shape `Animal ${this.species}`. Tests call `new Animal("cat").speak()`. Use a normal top-level class declaration.',
-    examples: [`new Animal("dog").speak() ⇒ "Animal dog"`],
+      'Declare **class Animal** with constructor receiving **species** storing on **this**. Add method **speak()** returning an ES template literal of the shape **Animal ${this.species}**. Tests call **new Animal("cat").speak()**. Use a normal top-level class declaration.',
+    examples: ['**new Animal("dog").speak()** ⇒ "Animal dog"'],
     constraints: ['Use ES classes (not purely factory objects).'],
     expectedBehavior:
       'Proper instanceof Animal.',
@@ -1961,7 +1964,7 @@ function daysBetween(isoStart, isoEnd) {
   }
 }
 `,
-    explanation: 'Capture species on the instance and template it inside `speak`.',
+    explanation: 'Capture species on the instance and template it inside **speak**.',
     testCases: [
       {
         name: 'template string',
@@ -1992,11 +1995,11 @@ function daysBetween(isoStart, isoEnd) {
     functionName: 'Dog',
     tags: ['classes'],
     conceptExplanation:
-      '`extends` inherits prototype methods while `super(...)` initializes parent state before customizing child behavior.',
+      '**extends** inherits prototype methods while **super(...)** initializes parent state before customizing child behavior.',
     prompt:
       'Implement Dog extends Animal. The Dog constructor must take a name argument, call super with the literal dog species string, and store the name on the instance. Override speak so it returns a template string that begins with Woof followed by the human-readable name from this challenge tests.',
-    examples: [`new Dog("Dot").speak()`],
-    constraints: [`Tests assume Animal baseline defined same way as prior lesson.`],
+    examples: ['**new Dog("Dot").speak()**'],
+    constraints: ['Tests assume Animal baseline defined same way as prior lesson.'],
     expectedBehavior:
       'Dog instances pass instanceof both Dog and Animal.',
     starterCode: `class Animal {}
@@ -2022,7 +2025,7 @@ class Dog extends Animal {
   }
 }
 `,
-    explanation: 'Call `super` with parent argument, then override `speak` with the dog-specific template.',
+    explanation: 'Call **super** with parent argument, then override **speak** with the dog-specific template.',
     testCases: [
       {
         name: 'override',
@@ -2053,11 +2056,11 @@ class Dog extends Animal {
     functionName: 'ArrayWrapper',
     tags: ['classes'],
     conceptExplanation:
-      'Coercing objects for `+` uses `valueOf` first; string contexts fall back to `toString`, which is why interview problems wrap arrays for math vs pretty printing.',
+      'Coercing objects for **+** uses **valueOf** first; string contexts fall back to **toString**, which is why interview problems wrap arrays for math vs pretty printing.',
     prompt:
-      'Implement `class ArrayWrapper(nums)` storing a numeric array copy. Define `valueOf()` returning the sum of integers. Define `toString()` returning comma-joined decimals (no brackets). Addition between two wrappers sums their totals via coercion.',
-    examples: ['`${new ArrayWrapper([[1],[2]])}` prints 1,2'],
-    constraints: [`Do not mutate constructor argument after copying.`],
+      'Implement **class ArrayWrapper(nums)** storing a numeric array copy. Define **valueOf()** returning the sum of integers. Define **toString()** returning comma-joined decimals (no brackets). Addition between two wrappers sums their totals via coercion.',
+    examples: ['**${new ArrayWrapper([[1],[2]])}** prints 1,2'],
+    constraints: ['Do not mutate constructor argument after copying.'],
     expectedBehavior:
       'Numeric coercion uses summed values.',
     starterCode: `class ArrayWrapper {
@@ -2078,7 +2081,7 @@ class Dog extends Animal {
   }
 }
 `,
-    explanation: 'Copy defensively; sum for `valueOf`; join commas for textual form.',
+    explanation: 'Copy defensively; sum for **valueOf**; join commas for textual form.',
     testCases: [
       {
         name: 'valueOf coercion',
@@ -2109,9 +2112,9 @@ class Dog extends Animal {
     functionName: 'Calculator',
     tags: ['classes'],
     conceptExplanation:
-      'Fluent calculators keep an internal tally and return `this` from mutators so callers can continue chaining before reading the final value.',
+      'Fluent calculators keep an internal tally and return **this** from mutators so callers can continue chaining before reading the final value.',
     prompt:
-      'Implement `class Calculator(value=0)` with methods `add(n)`, `subtract(n)`, `multiply(n)`, `divide(n)` mutating internal state and returning `this`. Method `value()` returns current number. Division by zero should set state to `Infinity` per JavaScript.',
+      'Implement **class Calculator(value=0)** with methods **add(n)**, **subtract(n)**, **multiply(n)**, **divide(n)** mutating internal state and returning **this**. Method **value()** returns current number. Division by zero should set state to **Infinity** per JavaScript.',
     examples: ['new Calculator(10).add(5).divide(3).value() ≈ 5'],
     constraints: ['All operations are sequential; no batching.'],
     expectedBehavior:
@@ -2145,7 +2148,7 @@ class Dog extends Animal {
   }
 }
 `,
-    explanation: 'Each mutator updates `this.total` and returns `this` for chaining; `value` reveals the snapshot.',
+    explanation: 'Each mutator updates **this.total** and returns **this** for chaining; **value** reveals the snapshot.',
     testCases: [
       {
         name: 'chain',
@@ -2176,11 +2179,11 @@ class Dog extends Animal {
     functionName: 'addTwoPromises',
     tags: ['async'],
     conceptExplanation:
-      '`Promise.all` fans out independent async values; adding their numeric results merges parallel fetch patterns common in onboarding tasks.',
+      '**Promise.all** fans out independent async values; adding their numeric results merges parallel fetch patterns common in onboarding tasks.',
     prompt:
-      'Implement `async function addTwoPromises(promise1, promise2)` concurrently awaiting BOTH numeric promises before returning `value1 + value2`. Use `await`/`Promise.all` equivalently.',
+      'Implement **async function addTwoPromises(promise1, promise2)** concurrently awaiting BOTH numeric promises before returning **value1 + value2**. Use **await**/**Promise.all** equivalently.',
     examples: ['Promise resolves 2 and Promise resolves 40 ⇒ 42'],
-    constraints: [`Inputs always resolve integers in tests.`],
+    constraints: ['Inputs always resolve integers in tests.'],
     expectedBehavior:
       'Propagates asynchronously.',
     starterCode: `async function addTwoPromises(promise1, promise2) {
@@ -2227,11 +2230,14 @@ class Dog extends Animal {
     functionName: 'sleep',
     tags: ['async'],
     conceptExplanation:
-      'Sleep promisifies timers so `async` flows can pause without busy polling—useful throttling fake latency in mocked fetch exercises.',
+      'Sleep promisifies timers so **async** flows can pause without busy polling—useful throttling fake latency in mocked fetch exercises.',
     prompt:
-      'Implement `sleep(ms)` returning a promise that resolves AFTER roughly `ms` milliseconds (timing precision only needs to suffice that ordering happens post delay). Resolver value should not matter; tests inspect elapsed ordering via deltas.',
-    examples: [`await sleep(20) advances control after ~20 ms`],
-    constraints: [`Use scheduling APIs (no busy loops spinning CPU).`, 'Milliseconds integer nonnegative in tests'],
+      'Implement **sleep(ms)** returning a promise that resolves AFTER roughly **ms** milliseconds (timing precision only needs to suffice that ordering happens post delay). Resolver value should not matter; tests inspect elapsed ordering via deltas.',
+    examples: ['**await sleep(20)** advances control after ~20 ms'],
+    constraints: [
+      'Use scheduling APIs (no busy loops spinning CPU).',
+      'Milliseconds integer nonnegative in tests',
+    ],
     expectedBehavior:
       'Promise resolves asynchronously.',
     starterCode: `function sleep(ms) {
@@ -2242,7 +2248,7 @@ class Dog extends Animal {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 `,
-    explanation: 'Resolve `resolve` callback after `ms` elapsed via macro task queue.',
+    explanation: 'Resolve **resolve** callback after **ms** elapsed via macro task queue.',
     testCases: [
       {
         name: 'ordering',
@@ -2276,9 +2282,9 @@ class Dog extends Animal {
     conceptExplanation:
       'Cancellation tokens pair timers with teardown functions—the returned cancel handler prevents scheduled work from observing stale state after navigation teardown.',
     prompt:
-      'Implement `cancellable(fn, args, delayMs)` invoking `fn` with SPREAD args after timer unless cancelled. Return `[resultPromise, cancelFn]`. Calling `cancelFn` clears pending timeout; promise resolves `undefined` if cancelled before firing, else resolves `fn` return value.',
+      'Implement **cancellable(fn, args, delayMs)** invoking **fn** with SPREAD args after timer unless cancelled. Return **[resultPromise, cancelFn]**. Calling **cancelFn** clears pending timeout; promise resolves **undefined** if cancelled before firing, else resolves **fn** return value.',
     examples: ['Cancel before fire ⇒ undefined'],
-    constraints: ['Use `setTimeout` / `clearTimeout`.', 'Keep delay small in tests (≤60ms).'],
+    constraints: ['Use **setTimeout** / **clearTimeout**.', 'Keep delay small in tests (≤60ms).'],
     expectedBehavior:
       'Promise never rejects for cancel path.',
     starterCode: `function cancellable(fn, argsArray, delayMs) {
@@ -2309,7 +2315,7 @@ class Dog extends Animal {
 }
 `,
     explanation:
-      'Promise resolves with the function outcome or `undefined` if cancelled early; guarded `settled` prevents double fulfilment.',
+      'Promise resolves with the function outcome or **undefined** if cancelled early; guarded **settled** prevents double fulfilment.',
     testCases: [
       {
         name: 'delayed result',
@@ -2354,8 +2360,8 @@ class Dog extends Animal {
     conceptExplanation:
       'Binary addition mirrors grade-school carry: walk both strings from LSB using integer carries without BigInt for small interview lengths.',
     prompt:
-      'Implement `binaryCalc(a, b)` where inputs are binary strings (only `0`/`1`, optional leading zeros). Return their sum as a binary string without extra leading zeros except the single zero case.',
-    examples: [`binaryCalc("11","1") ⇒ "100"`],
+      'Implement **binaryCalc(a, b)** where inputs are binary strings (only **0**/**1**, optional leading zeros). Return their sum as a binary string without extra leading zeros except the single zero case.',
+    examples: ['**binaryCalc("11","1")** ⇒ "100"'],
     constraints: ['Inputs length ≤32 in tests.', 'No BigInt APIs.'],
     expectedBehavior:
       'Adds as unsigned binary.',
@@ -2418,9 +2424,9 @@ class Dog extends Animal {
     conceptExplanation:
       'Memoization trades memory for recomputation by hashing prior arguments—fine for deterministic pure unary calls like Fibonacci warmup.',
     prompt:
-      'Implement `memoize(fn)` for Unary `fn`. Return NEW function invoking `fn` at most ONCE per unique argument (strict equality compare). Subsequent calls replay cached RETURN values.',
-    examples: [`let c=0; const m=memoize(()=>++c); m(); m()`],
-    constraints: [`Cache lives for application lifetime.`],
+      'Implement **memoize(fn)** for Unary **fn**. Return NEW function invoking **fn** at most ONCE per unique argument (strict equality compare). Subsequent calls replay cached RETURN values.',
+    examples: ['**let c=0; const m=memoize(()=>++c); m(); m()**'],
+    constraints: ['Cache lives for application lifetime.'],
     expectedBehavior:
       'Same reference returned for memo hits.',
     starterCode: `function memoize(fn) {
@@ -2437,7 +2443,7 @@ class Dog extends Animal {
   }
 }
 `,
-    explanation: 'Use `Map` keyed by arg pointer/primitive to store computed results.',
+    explanation: 'Use **Map** keyed by arg pointer/primitive to store computed results.',
     testCases: [
       {
         name: 'expensive once',
@@ -2481,9 +2487,9 @@ class Dog extends Animal {
     conceptExplanation:
       'Combining deadlines with awaited work uses Promise.race: whichever settles first dictates success versus timeout rejection—a pattern for guarding flaky network mocks.',
     prompt:
-      'Implement `timeLimit(fn, ms)` returning an async wrapper that races the underlying promise against a timer. If the promise wins, return its value. If the timer wins first, reject with an Error whose message is exactly the sentence Time Limit Exceeded with those three capitalized words.',
-    examples: [`Fast resolve beats timeout.`],
-    constraints: [`Use timers with short durations in CI.`],
+      'Implement **timeLimit(fn, ms)** returning an async wrapper that races the underlying promise against a timer. If the promise wins, return its value. If the timer wins first, reject with an Error whose message is exactly the sentence Time Limit Exceeded with those three capitalized words.',
+    examples: ['**Fast resolve** beats timeout.'],
+    constraints: ['Use timers with short durations in CI.'],
     expectedBehavior:
       'Resolved path returns actual value.',
     starterCode: `function timeLimit(fn, ms) {
@@ -2547,9 +2553,9 @@ class Dog extends Animal {
     conceptExplanation:
       'TTL eviction maps business keys onto timestamped entries so lookups auto-expire without manual cron sweeps in browser exercises.',
     prompt:
-      '`class TimeLimitedCache` exposes `set(key,val,duration)` recording expiry offset ms from invocation time `Date.now()`, `get(key)` returns val if alive else undefined, `count()` returns non-expired keys only. Repeated `set` updates expiry/value.',
-    examples: [`get after ttl resolves undefined.`],
-    constraints: [`No background cleanup threads; purge lazily on access.`],
+      '**class TimeLimitedCache** exposes **set(key,val,duration)** recording expiry offset ms from invocation time **Date.now()**, **get(key)** returns val if alive else undefined, **count()** returns non-expired keys only. Repeated **set** updates expiry/value.',
+    examples: ['**get after ttl** resolves undefined.'],
+    constraints: ['No background cleanup threads; purge lazily on access.'],
     expectedBehavior:
       'Stale entries invisible.',
     starterCode: `class TimeLimitedCache {
@@ -2582,7 +2588,7 @@ class Dog extends Animal {
 }
 `,
     explanation:
-      'Store expiry absolute ms; prune during `get`/`count`; delete expired records eagerly.',
+      'Store expiry absolute ms; prune during **get**/**count**; delete expired records eagerly.',
     testCases: [
       {
         name: 'basic expire',
@@ -2629,11 +2635,14 @@ class Dog extends Animal {
     functionName: 'promiseAll',
     tags: ['async'],
     conceptExplanation:
-      'Flattening heterogeneous promises into one deterministic array parallels `Promise.all` plumbing in polyfills.',
+      'Flattening heterogeneous promises into one deterministic array parallels **Promise.all** plumbing in polyfills.',
     prompt:
-      'Implement `promiseAll(iterable)` behaving like ES `Promise.all` for iterable of Promises/non-promises resolving array of positional results rejecting with first rejection reason.',
-    examples: [`await promiseAll([Promise.resolve(1),2]) ⇒ [1,2]`],
-    constraints: [`Do NOT call Promise.all or Promise.any`, 'Write scheduling manually'],
+      'Implement **promiseAll(iterable)** behaving like ES **Promise.all** for iterable of Promises/non-promises resolving array of positional results rejecting with first rejection reason.',
+    examples: ['**await promiseAll([Promise.resolve(1),2])** ⇒ [1,2]'],
+    constraints: [
+      'Do NOT call Promise.all or Promise.any',
+      'Write scheduling manually',
+    ],
     expectedBehavior:
       'Propagates rejects.',
     starterCode: `function promiseAll(input) {
@@ -2701,9 +2710,9 @@ class Dog extends Animal {
     conceptExplanation:
       'Using a string key or callback to bucket records supports SQL-style GROUP BY without importing lodash in whiteboard tasks.',
     prompt:
-      'Implement `groupBy(arr, key)` where `key` is either string property name OR callback `(item)=>groupId`. Return plain object mapping each `groupId` (stringified using template string) to array of items in original order within bucket.',
-    examples: [`groupBy([{g:'a'},{g:'a'}],'g')`],
-    constraints: [`Group ids stringify via String(result).`],
+      'Implement **groupBy(arr, key)** where **key** is either string property name OR callback **(item)=>groupId**. Return plain object mapping each **groupId** (stringified using template string) to array of items in original order within bucket.',
+    examples: ["**groupBy([{g:'a'},{g:'a'}],'g')**"],
+    constraints: ['Group ids stringify via String(result).'],
     expectedBehavior:
       'Stable relative order per bucket.',
     starterCode: `function groupBy(arr, key) {
@@ -2752,14 +2761,14 @@ class Dog extends Animal {
     difficulty: 'easy',
     hookConcepts: ['useState'],
     conceptExplanation:
-      'A controlled input drives the input value from React state: `value={state}` and `onChange` updates state so the UI is always in sync.',
+      'A controlled input drives the input value from React state: **value={state}** and **onChange** updates state so the UI is always in sync.',
     examples: [
       'Typing updates state; the displayed value always matches state.',
       'Derive uppercase display from the same state in render.',
     ],
     constraints: ['Use useState; do not read the DOM for the current text.'],
     prompt:
-      'Explain how to build a controlled `<input>` in React. Provide a minimal component using `useState` that uppercases display.',
+      'Explain how to build a controlled **<input>** in React. Provide a minimal component using **useState** that uppercases display.',
     componentCode: `import { useState } from 'react'
 
 export function UpperInput() {
@@ -2774,9 +2783,9 @@ export function UpperInput() {
 }`,
     expectedRenderBehavior: 'Typing updates state; paragraph shows uppercase of the input.',
     dataFlowExplanation:
-      'Events bubble to `onChange`, which calls `setValue` with the new string; React re-renders with the controlled `value`.',
+      'Events bubble to **onChange**, which calls **setValue** with the new string; React re-renders with the controlled **value**.',
     solutionCode:
-      '`value` and `onChange` bind the input to React state so the source of truth lives in the component.',
+      '**value** and **onChange** bind the input to React state so the source of truth lives in the component.',
     explanation:
       'Controlled components make React state the single source of truth for the input value.',
   },
@@ -2788,7 +2797,7 @@ export function UpperInput() {
     difficulty: 'medium',
     hookConcepts: ['useEffect', 'closures', 'useRef'],
     prompt:
-      'This effect logs `count` every second but appears stuck. Identify the stale closure and fix the dependency array.',
+      'This effect logs **count** every second but appears stuck. Identify the stale closure and fix the dependency array.',
     brokenComponentCode: `import { useEffect, useState } from 'react'
 
 export function StaleCounter() {
@@ -2814,13 +2823,13 @@ export function StaleCounter() {
   return <button onClick={() => setCount((c) => c + 1)}>+</button>
 }`,
     expectedRenderBehavior:
-      'Each render schedules an effect that logs the latest `count` (or use a ref for stable interval).',
+      'Each render schedules an effect that logs the latest **count** (or use a ref for stable interval).',
     dataFlowExplanation:
-      'Empty deps capture the initial `count` forever. Adding `[count]` or a ref pattern refreshes the closure.',
+      'Empty deps capture the initial **count** forever. Adding **[count]** or a ref pattern refreshes the closure.',
     solutionCode:
-      'Either depend on `[count]` or keep `count` in a ref read inside the interval to avoid resetting the timer unnecessarily.',
+      'Either depend on **[count]** or keep **count** in a ref read inside the interval to avoid resetting the timer unnecessarily.',
     explanation:
-      'Effects close over values from the render they were created from; stale closures are the #1 `useEffect` footgun.',
+      'Effects close over values from the render they were created from; stale closures are the #1 **useEffect** footgun.',
   },
   {
     id: 'react-lift-state',
@@ -2844,8 +2853,8 @@ function Parent() {
 }`,
     expectedRenderBehavior: 'Both children reflect the same boolean.',
     dataFlowExplanation:
-      'State lives in `Parent`; children receive props and event handlers instead of owning duplicate state.',
-    solutionCode: 'Move `useState` to the nearest common ancestor and pass `on` / `setOn` as props.',
+      'State lives in **Parent**; children receive props and event handlers instead of owning duplicate state.',
+    solutionCode: 'Move **useState** to the nearest common ancestor and pass **on** / **setOn** as props.',
     explanation:
       'Lift state to the lowest common parent to establish a single source of truth for siblings.',
   },
@@ -2857,7 +2866,7 @@ function Parent() {
     difficulty: 'medium',
     hookConcepts: ['useMemo'],
     prompt:
-      'Given `items` and `filter`, derive `visible` with `useMemo`. When should you skip `useMemo`?',
+      'Given **items** and **filter**, derive **visible** with **useMemo**. When should you skip **useMemo**?',
     componentCode: `import { useMemo, useState } from 'react'
 
 export function List({ items }) {
@@ -2870,9 +2879,9 @@ export function List({ items }) {
     </>
   )
 }`,
-    expectedRenderBehavior: 'Filter updates when `items` or query changes; avoids recomputing on unrelated renders.',
+    expectedRenderBehavior: 'Filter updates when **items** or query changes; avoids recomputing on unrelated renders.',
     dataFlowExplanation:
-      '`useMemo` recomputes only when deps change; cheap derives may omit memoization.',
+      '**useMemo** recomputes only when deps change; cheap derives may omit memoization.',
     solutionCode: 'useMemo(() => compute(items, q), [items, q])',
     explanation:
       'Memoize expensive derivations; for tiny arrays Profile first—premature memoization adds complexity.',
@@ -2885,7 +2894,7 @@ export function List({ items }) {
     difficulty: 'medium',
     hookConcepts: ['useCallback', 'memo'],
     prompt:
-      'When does `useCallback` help prevent child re-renders? Pair it with `React.memo` on a child.',
+      'When does **useCallback** help prevent child re-renders? Pair it with **React.memo** on a child.',
     componentCode: `import { useCallback, useState, memo } from 'react'
 
 const Row = memo(function Row({ label, onSelect }) {
@@ -2898,9 +2907,9 @@ export function Table({ rows }) {
   return rows.map((r) => <Row key={r} label={r} onSelect={onSelect} />)
 }`,
     expectedRenderBehavior:
-      'Stable `onSelect` keeps `Row` from re-rendering when parent re-renders for unrelated state.',
+      'Stable **onSelect** keeps **Row** from re-rendering when parent re-renders for unrelated state.',
     dataFlowExplanation:
-      'New function identities each render break `memo`; `useCallback` stabilizes identity if deps are stable.',
+      'New function identities each render break **memo**; **useCallback** stabilizes identity if deps are stable.',
     solutionCode: 'useCallback(fn, [deps]) + memoized child',
     explanation:
       'useCallback is for referential stability; it is unnecessary unless a memoized child depends on the function prop.',
@@ -2912,7 +2921,7 @@ export function Table({ rows }) {
     category: 'React Hooks',
     difficulty: 'medium',
     hookConcepts: ['useEffect', 'useState', 'custom hooks'],
-    prompt: 'Move repeated fetch + loading + error logic into `useJson(url)`.',
+    prompt: 'Move repeated fetch + loading + error logic into **useJson(url)**.',
     componentCode: `function useJson(url) {
   const [data, setData] = useState(null)
   const [err, setErr] = useState(null)
@@ -2940,7 +2949,7 @@ export function Table({ rows }) {
     expectedRenderBehavior: 'Consumers subscribe to normalized async state for a URL.',
     dataFlowExplanation:
       'Custom hooks share stateful logic; cleanup avoids setting state after unmount.',
-    solutionCode: 'Encapsulate effect + state in `use*` and return a small API object.',
+    solutionCode: 'Encapsulate effect + state in **use*** and return a small API object.',
     explanation: 'Custom hooks are just functions that call hooks; they promote reuse and testing.',
   },
 
@@ -2953,12 +2962,12 @@ export function Table({ rows }) {
     difficulty: 'easy',
     functionName: 'doubleAll',
     conceptExplanation:
-      'Loop bounds: to visit every index `0..length-1`, the condition is `i < nums.length`, not `i < nums.length - 1`.',
+      'Loop bounds: to visit every index **0..length-1**, the condition is **i < nums.length**, not **i < nums.length - 1**.',
     examples: ['Input [1,2,3] should double to [2,4,6] including the last element.'],
     expectedBehavior:
       'Return a new array where every input number is doubled, all elements.',
     prompt:
-      'Users report the last element is skipped. Fix the loop in `doubleAll` in the editor so it processes every index.',
+      'Users report the last element is skipped. Fix the loop in **doubleAll** in the editor so it processes every index.',
     brokenCode: `function doubleAll(nums) {
   const out = []
   for (let i = 0; i < nums.length - 1; i++) {
@@ -2973,8 +2982,8 @@ export function Table({ rows }) {
   }
   return out
 }`,
-    fixExplanation: 'Loop condition used `length - 1`, skipping the final index.',
-    explanation: 'Classic off-by-one: iterate while `i < length`, not `length - 1`.',
+    fixExplanation: 'Loop condition used **length - 1**, skipping the final index.',
+    explanation: 'Classic off-by-one: iterate while **i < length**, not **length - 1**.',
     testCases: [
       {
         name: 'all elements',
@@ -2996,12 +3005,12 @@ export function Table({ rows }) {
     difficulty: 'medium',
     requiresManualVerification: true,
     conceptExplanation:
-      'React uses `key` to match list items between renders. Index keys break when order changes because identity follows the slot, not the data.',
+      'React uses **key** to match list items between renders. Index keys break when order changes because identity follows the slot, not the data.',
     examples: [
       'After sort/filter, index 0 might point to a different entity than before.',
     ],
     expectedBehavior:
-      'Use stable domain ids (e.g. `item.id`) for `key` when items can reorder.',
+      'Use stable domain ids (e.g. **item.id**) for **key** when items can reorder.',
     prompt:
       'List items behave oddly after reorder/filter. Rewrite the list mapping to use stable keys (edit the snippet in the editor).',
     brokenCode: `items.map((item, idx) => (
@@ -3057,7 +3066,7 @@ useEffect(() => {
 }, [throttle])`,
     fixExplanation:
       'Inline object literals are new references each render; hoist primitives or memoize objects.',
-    explanation: 'Deep compare is not default; stabilize references with `useMemo` or primitives.',
+    explanation: 'Deep compare is not default; stabilize references with **useMemo** or primitives.',
   },
   {
     id: 'dbg-typeof-null',
@@ -3067,18 +3076,18 @@ useEffect(() => {
     difficulty: 'easy',
     functionName: 'isObject',
     conceptExplanation:
-      'In JavaScript, `typeof null === "object"` is a long-standing quirk. Guards must often check `x !== null` before treating something as an object.',
-    examples: ['`isObject(null)` should be false. `isObject({})` should be true.'],
+      'In JavaScript, **typeof null === "object"** is a long-standing quirk. Guards must often check **x !== null** before treating something as an object.',
+    examples: ['**isObject(null)** should be false. **isObject({})** should be true.'],
     expectedBehavior:
       'Return true only for non-null object values (objects, arrays, etc.).',
-    prompt: 'Validator rejects valid payloads when body is null. Fix `isObject`.',
+    prompt: 'Validator rejects valid payloads when body is null. Fix **isObject**.',
     brokenCode: `function isObject(x) {
   return typeof x === 'object'
 }`,
     fixCode: `function isObject(x) {
   return x !== null && typeof x === 'object'
 }`,
-    fixExplanation: '`typeof null === "object"` in JavaScript—explicit null check required.',
+    fixExplanation: '**typeof null === "object"** in JavaScript—explicit null check required.',
     explanation: 'Historical JS bug: null is typeof object. Always check null first.',
     testCases: [
       {
@@ -3213,9 +3222,9 @@ useEffect(() => {
     functionName: 'twoSum',
     tags: ['hash map'],
     conceptExplanation:
-      'One pass with a map from value → index: for each value, check if `target - value` was seen.',
+      'One pass with a map from value → index: for each value, check if **target - value** was seen.',
     prompt:
-      'Given `nums` and `target`, return indices `[i,j]` with `i < j` and `nums[i]+nums[j]===target`. Exactly one solution exists. O(n) time expected.',
+      'Given **nums** and **target**, return indices **[i,j]** with **i < j** and **nums[i]+nums[j]===target**. Exactly one solution exists. O(n) time expected.',
     examples: ['nums = [2,7,11,15], target = 9 → [0,1]'],
     constraints: ['Do not use O(n^2) nested loops for large inputs.'],
     expectedBehavior: 'Return array of two distinct indices.',
@@ -3231,7 +3240,7 @@ useEffect(() => {
   }
 }`,
     explanation:
-      'Store value→index while scanning; for each x check if `target-x` was seen.',
+      'Store value→index while scanning; for each x check if **target-x** was seen.',
     testCases: [
       {
         name: 'classic',
@@ -3261,9 +3270,9 @@ useEffect(() => {
     functionName: 'reverse',
     tags: ['linked list'],
     conceptExplanation:
-      'Reverse pointers iteratively: track previous, current, and next; flip `cur.next` toward `prev`.',
+      'Reverse pointers iteratively: track previous, current, and next; flip **cur.next** toward **prev**.',
     prompt:
-      'Nodes are `{ value, next }`. Implement `reverse(head)` returning the new head. `null` in, `null` out.',
+      'Nodes are **{ value, next }**. Implement **reverse(head)** returning the new head. **null** in, **null** out.',
     examples: ['1→2→3 becomes 3→2→1'],
     constraints: ['O(n) time, O(1) extra space for iterative solution.'],
     expectedBehavior: 'Return head of reversed list.',
@@ -3281,7 +3290,7 @@ useEffect(() => {
   }
   return prev
 }`,
-    explanation: 'Iteratively redirect `next` pointers: carry `prev` and `cur` forward.',
+    explanation: 'Iteratively redirect **next** pointers: carry **prev** and **cur** forward.',
     testCases: [
       {
         name: 'three nodes',

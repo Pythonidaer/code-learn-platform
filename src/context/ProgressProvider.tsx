@@ -11,14 +11,15 @@ import {
   clearAllCompleted,
   clearAllSavedCode,
   clearSavedCode,
-  getAiTutorCache,
+  getAiTutorThread,
   getCompletedIds,
   getSavedCode,
   migrateLegacyStorageIfNeeded,
   markCompleteId,
   removeCompletedId,
   resetAllLocalData,
-  setAiTutorCache,
+  type TutorThreadMessage,
+  setAiTutorThread,
   setSavedCode as persistSavedCode,
 } from '../utils/progressStorage'
 import { ProgressContext } from './progressContext'
@@ -30,7 +31,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   })
 
   const [codeVersion, setCodeVersion] = useState(0)
-  const [aiVersion, setAiVersion] = useState(0)
+  const [aiTutorCacheEpoch, setAiTutorCacheEpoch] = useState(0)
 
   useEffect(() => {
     migrateLegacyStorageIfNeeded()
@@ -76,31 +77,30 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     setCompletedIds(new Set())
   }, [])
 
-  const getAiTutorCacheCb = useCallback(
-    (id: string) => getAiTutorCache(id),
-    [aiVersion],
-  )
+  const getAiTutorThreadCb = useCallback((id: string) => getAiTutorThread(id), [])
 
-  const setAiTutorCacheCb = useCallback((id: string, text: string) => {
-    setAiTutorCache(id, text)
-    setAiVersion((n) => n + 1)
-  }, [])
+  const setAiTutorThreadCb = useCallback(
+    (id: string, messages: TutorThreadMessage[]) => {
+      setAiTutorThread(id, messages)
+    },
+    [],
+  )
 
   const clearAiTutorCacheFor = useCallback((id: string) => {
     clearAiTutorCache(id)
-    setAiVersion((n) => n + 1)
+    setAiTutorCacheEpoch((n) => n + 1)
   }, [])
 
   const clearAllAiTutorCacheCb = useCallback(() => {
     clearAllAiTutorCache()
-    setAiVersion((n) => n + 1)
+    setAiTutorCacheEpoch((n) => n + 1)
   }, [])
 
   const resetAllLocalDataCb = useCallback(() => {
     resetAllLocalData()
     setCompletedIds(new Set())
     setCodeVersion((n) => n + 1)
-    setAiVersion((n) => n + 1)
+    setAiTutorCacheEpoch((n) => n + 1)
   }, [])
 
   const value = useMemo(
@@ -114,8 +114,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       clearSavedCodeFor,
       clearAllSavedCode: clearAllSavedCodeCb,
       clearAllCompleted: clearAllCompletedCb,
-      getAiTutorCache: getAiTutorCacheCb,
-      setAiTutorCache: setAiTutorCacheCb,
+      aiTutorCacheEpoch,
+      getAiTutorThread: getAiTutorThreadCb,
+      setAiTutorThread: setAiTutorThreadCb,
       clearAiTutorCacheFor,
       clearAllAiTutorCache: clearAllAiTutorCacheCb,
       resetAllLocalData: resetAllLocalDataCb,
@@ -130,8 +131,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       clearSavedCodeFor,
       clearAllSavedCodeCb,
       clearAllCompletedCb,
-      getAiTutorCacheCb,
-      setAiTutorCacheCb,
+      aiTutorCacheEpoch,
+      getAiTutorThreadCb,
+      setAiTutorThreadCb,
       clearAiTutorCacheFor,
       clearAllAiTutorCacheCb,
       resetAllLocalDataCb,

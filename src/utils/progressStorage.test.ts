@@ -5,16 +5,17 @@ import {
   clearAllSavedCode,
   clearAiTutorCache,
   clearSavedCode,
-  getAiTutorCache,
+  getAiTutorThread,
   getCompletedIds,
   getSavedCode,
   markCompleteId,
   migrateLegacyStorageIfNeeded,
   removeCompletedId,
   resetAllLocalData,
+  setAiTutorThread,
   setCompletedIds,
-  setAiTutorCache,
   setSavedCode,
+  type TutorThreadMessage,
 } from './progressStorage'
 
 const KEY_COMPLETED = 'code-learn-completed'
@@ -28,6 +29,11 @@ function clearAllKeys(): void {
   localStorage.removeItem(KEY_AI_CACHE)
   localStorage.removeItem(LEGACY)
 }
+
+const sampleThread: TutorThreadMessage[] = [
+  { role: 'user', content: 'Give me a hint' },
+  { role: 'assistant', content: 'Try using a counter in closure scope.' },
+]
 
 describe('progressStorage', () => {
   afterEach(() => {
@@ -71,28 +77,39 @@ describe('progressStorage', () => {
     expect(getSavedCode('b')).toBeUndefined()
   })
 
-  it('AI tutor cache round-trips', () => {
-    setAiTutorCache('q1', 'hello')
-    expect(getAiTutorCache('q1')).toBe('hello')
+  it('AI tutor thread round-trips multi-turn messages', () => {
+    setAiTutorThread('q1', sampleThread)
+    expect(getAiTutorThread('q1')).toEqual(sampleThread)
     clearAiTutorCache('q1')
-    expect(getAiTutorCache('q1')).toBeUndefined()
+    expect(getAiTutorThread('q1')).toEqual([])
   })
 
-  it('clearAllAiTutorCache clears cache', () => {
-    setAiTutorCache('a', '1')
-    setAiTutorCache('b', '2')
+  it('clearAllAiTutorCache clears tutor threads', () => {
+    setAiTutorThread('a', sampleThread)
+    setAiTutorThread('b', [{ role: 'user', content: 'x' }, { role: 'assistant', content: 'y' }])
     clearAllAiTutorCache()
-    expect(getAiTutorCache('a')).toBeUndefined()
+    expect(getAiTutorThread('a')).toEqual([])
+    expect(getAiTutorThread('b')).toEqual([])
+  })
+
+  it('parses legacy single-string cache as one assistant bubble', () => {
+    localStorage.setItem(
+      KEY_AI_CACHE,
+      JSON.stringify({ old: 'Legacy **markdown** reply' }),
+    )
+    expect(getAiTutorThread('old')).toEqual([
+      { role: 'assistant', content: 'Legacy **markdown** reply' },
+    ])
   })
 
   it('resetAllLocalData clears completion, code, and AI cache', () => {
     markCompleteId('done')
     setSavedCode('c', 'code')
-    setAiTutorCache('c', 'ai')
+    setAiTutorThread('c', sampleThread)
     resetAllLocalData()
     expect(getCompletedIds()).toEqual([])
     expect(getSavedCode('c')).toBeUndefined()
-    expect(getAiTutorCache('c')).toBeUndefined()
+    expect(getAiTutorThread('c')).toEqual([])
   })
 
   it('clearAllCompleted removes completion key behavior', () => {
