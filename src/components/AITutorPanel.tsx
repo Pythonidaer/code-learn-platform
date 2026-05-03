@@ -20,6 +20,12 @@ import type {
 import type { TutorThreadMessage } from '../utils/progressStorage'
 import { MarkdownMessage } from './MarkdownMessage'
 import { useProgress } from '../hooks/useProgress'
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
+import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis'
+import {
+  getReadAloudPreference,
+  setReadAloudPreference,
+} from '../utils/speechPrefsStorage'
 import styles from './AITutorPanel.module.css'
 
 /** Max height before internal scroll (keep in sync with `.textareaComposer` max-height). */
@@ -83,6 +89,10 @@ function completedTurnPairs(
   return pairs
 }
 
+function assistantTurnId(challengeId: string, messageIndex: number): string {
+  return `tutor-msg-${challengeId}-${messageIndex}`
+}
+
 function ArrowUpSendIcon() {
   return (
     <svg className={styles.sendIcon} viewBox="0 0 24 24" aria-hidden>
@@ -94,6 +104,36 @@ function ArrowUpSendIcon() {
         strokeLinejoin="round"
         d="M12 17V9m0 0-4 4m4-4 4 4"
       />
+    </svg>
+  )
+}
+
+function MicIcon() {
+  return (
+    <svg className={styles.micIcon} viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="currentColor"
+        d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm7-3a7 7 0 0 1-14 0h2a5 5 0 1 0 10 0h2Zm-7 9a2 2 0 0 0 2-2h2a4 4 0 1 1-8 0h2c0 1.1.9 2 2 2Z"
+      />
+    </svg>
+  )
+}
+
+function SpeakIcon() {
+  return (
+    <svg className={styles.smallIcon} viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="currentColor"
+        d="M3 10v4h4l5 5V5L7 10H3Zm13.5 3A4.47 4.47 0 0 0 16 11.45v1.74c0 .55.09 1.08.26 1.58a3.5 3.5 0 0 1-2.73-6.92 3 3 0 0 0 .04 4.6 3 3 0 0 1 .43-6.92h.06A5 5 0 0 1 21 11a4.93 4.93 0 0 1-2.73 4.53 3 3 0 0 0 .23-5.53Z"
+      />
+    </svg>
+  )
+}
+
+function StopSpeechIcon() {
+  return (
+    <svg className={styles.smallIcon} viewBox="0 0 24 24" aria-hidden>
+      <path fill="currentColor" d="M6 6h12v12H6V6Z" />
     </svg>
   )
 }
@@ -213,6 +253,12 @@ export function AITutorPanel({
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [readResponsesAloud, setReadResponsesAloud] = useState(
+    () => getReadAloudPreference(),
+  )
+
+  const speech = useSpeechSynthesis()
+  const voiceRec = useSpeechRecognition()
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const composerRef = useRef<HTMLTextAreaElement>(null)
@@ -255,6 +301,19 @@ export function AITutorPanel({
     bottomRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' })
   }, [messages, loading])
 
+  useEffect(() => {
+    return () => {
+      speech.stop()
+      voiceRec.stop()
+    }
+    // speech.stop / voiceRec.stop are stable callbacks from hooks
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speech.stop, voiceRec.stop])
+
+  useEffect(() => {
+    if (loading) voiceRec.stop()
+  }, [loading, voiceRec.stop])
+
   const buildParamsBase = useCallback(
     (intent: TutorShortcutIntent, userBubble: string): BuildTutorMessagesParams => ({
       challenge,
@@ -295,6 +354,7 @@ export function AITutorPanel({
       setMessages(threadAfterUser)
       setLoading(true)
       setError(null)
+      voiceRec.stop()
       if (intent === 'custom') setInput('')
 
       try {
@@ -308,6 +368,10 @@ export function AITutorPanel({
         ]
         setMessages(done)
         setAiTutorThread(challenge.id, done)
+        if (readResponsesAloud) {
+          const msgId = assistantTurnId(challenge.id, done.length - 1)
+          speech.speak(text, msgId)
+        }
       } catch (e) {
         setMessages((prev) => prev.slice(0, -1))
         setError(e instanceof Error ? e.message : 'Request failed')
@@ -315,12 +379,16 @@ export function AITutorPanel({
         setLoading(false)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- speech.speak from useSpeechSynthesis suffices
     [
       input,
       messages,
       buildParamsBase,
       challenge.id,
       setAiTutorThread,
+      readResponsesAloud,
+      speech.speak,
+      voiceRec.stop,
     ],
   )
 
@@ -366,6 +434,41 @@ export function AITutorPanel({
             }
           >
             <MarkdownMessage content={m.content} />
+            {speech.isSupported ? (
+              <div className={styles.assistantSpeechRow}>
+                {speech.speakingMessageId ===
+                assistantTurnId(challenge.id, idx) ? (
+                  <button
+                    type="button"
+                    className={styles.speechCtl}
+                    data-testid={`ai-tutor-stop-speech-${idx}`}
+                    aria-label="Stop reading aloud"
+                    title="Stop reading aloud"
+                    onClick={() => speech.stop()}
+                  >
+                    <StopSpeechIcon />
+                    <span>Stop</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.speechCtl}
+                    data-testid={`ai-tutor-speak-${idx}`}
+                    aria-label="Read assistant response aloud"
+                    title="Read this response aloud"
+                    onClick={() =>
+                      speech.speak(
+                        m.content,
+                        assistantTurnId(challenge.id, idx),
+                      )
+                    }
+                  >
+                    <SpeakIcon />
+                    <span>Speak</span>
+                  </button>
+                )}
+              </div>
+            ) : null}
           </div>
         )
       })}
@@ -390,19 +493,54 @@ export function AITutorPanel({
       <label htmlFor="tutor-input" className="sr-only">
         Your question
       </label>
-      <div className={styles.composerWrap}>
+      <div className={styles.composerWrap} aria-busy={loading || undefined}>
         <textarea
           ref={composerRef}
           id="tutor-input"
           data-testid="ai-tutor-input"
           className={styles.textareaComposer}
           rows={1}
-          placeholder="Ask the tutor…"
+          placeholder={
+            loading ? 'Waiting for tutor response…' : 'Ask the tutor…'
+          }
           value={input}
+          disabled={loading}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onComposerKeyDown}
         />
         <div className={styles.composerSendRail}>
+          {voiceRec.isSupported ? (
+            <button
+              type="button"
+              className={styles.micFab}
+              data-testid="ai-tutor-mic"
+              disabled={loading}
+              aria-pressed={voiceRec.isListening && !loading}
+              aria-label={
+                loading
+                  ? 'Voice input disabled while tutor responds'
+                  : voiceRec.isListening
+                    ? 'Stop voice input'
+                    : 'Start voice input'
+              }
+              title={
+                loading
+                  ? 'Voice input pauses until the tutor finishes responding.'
+                  : voiceRec.isListening
+                    ? 'Stop voice input'
+                    : 'Start voice input'
+              }
+              onClick={() => {
+                if (voiceRec.isListening) {
+                  voiceRec.stop()
+                } else {
+                  voiceRec.start(input, setInput)
+                }
+              }}
+            >
+              <MicIcon />
+            </button>
+          ) : null}
           <button
             type="button"
             data-testid="ai-tutor-send"
@@ -416,6 +554,108 @@ export function AITutorPanel({
           </button>
         </div>
       </div>
+      {voiceRec.error ? (
+        <p className={styles.voiceRecError} role="alert">
+          {voiceRec.error}
+        </p>
+      ) : null}
+    </div>
+  )
+
+  const speechVoiceSelectValue =
+    speech.selectedVoiceUri &&
+    speech.voices.some((v) => v.voiceURI === speech.selectedVoiceUri)
+      ? speech.selectedVoiceUri
+      : ''
+
+  const speechBar = (
+    <div className={styles.speechBar}>
+      {speech.isSupported ? (
+        <>
+          <div className={styles.speechBarMain}>
+            <div className={styles.readAloudRow}>
+              <input
+                id="tutor-read-aloud"
+                data-testid="ai-tutor-read-aloud"
+                type="checkbox"
+                className={styles.readAloudCheckbox}
+                checked={readResponsesAloud}
+                onChange={(e) => {
+                  const v = e.target.checked
+                  setReadResponsesAloud(v)
+                  setReadAloudPreference(v)
+                }}
+              />
+              <label htmlFor="tutor-read-aloud" className={styles.readAloudLabel}>
+                Read responses aloud
+              </label>
+            </div>
+            <div className={styles.speechControlsRow}>
+              <label className={styles.speechFieldLabel} htmlFor="tutor-voice">
+                Voice
+              </label>
+              <select
+                id="tutor-voice"
+                data-testid="ai-tutor-voice-select"
+                className={styles.voiceSelect}
+                value={speechVoiceSelectValue}
+                aria-label="Speech synthesis voice"
+                onChange={(e) => {
+                  const uri = e.target.value
+                  if (!uri) {
+                    speech.setSelectedVoice(null)
+                    return
+                  }
+                  const v = speech.voices.find((x) => x.voiceURI === uri)
+                  speech.setSelectedVoice(v ?? null)
+                }}
+              >
+                <option value="">
+                  Default browser voice
+                </option>
+                {speech.voices.map((v) => (
+                  <option key={v.voiceURI} value={v.voiceURI}>
+                    {v.name} ({v.lang})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.rateRow}>
+              <label className={styles.rateLabel} htmlFor="tutor-speech-rate">
+                Rate{' '}
+                <span aria-hidden>{speech.rate.toFixed(2)}×</span>
+              </label>
+              <input
+                id="tutor-speech-rate"
+                data-testid="ai-tutor-speech-rate"
+                type="range"
+                className={styles.rateRange}
+                min={0.5}
+                max={2}
+                step={0.25}
+                value={speech.rate}
+                aria-label="Speech rate"
+                onChange={(e) => speech.setRate(Number(e.target.value))}
+              />
+            </div>
+            {speech.voices.length === 0 ? (
+              <p className={styles.speechFootnote} role="status">
+                Voices may appear after the page finishes loading; if the list
+                stays empty, your browser may use a single default voice.
+              </p>
+            ) : null}
+          </div>
+        </>
+      ) : (
+        <p className={styles.speechNotice} role="status">
+          Spoken playback is not available in this browser.
+        </p>
+      )}
+      {!voiceRec.isSupported ? (
+        <p className={styles.speechFootnote} role="status">
+          Voice input is not available in this browser.
+        </p>
+      ) : null}
     </div>
   )
 
@@ -427,26 +667,22 @@ export function AITutorPanel({
     />
   )
 
-  let actionsChrome: ReactNode = null
-  if (!embedded) {
-    actionsChrome = (
-      <div className={styles.standaloneToolbar}>
-        <h2 className={styles.title}>AI tutor</h2>
-        {actionsMenu}
-      </div>
-    )
-  } else if (tutorHeaderActionsHost) {
-    actionsChrome = createPortal(actionsMenu, tutorHeaderActionsHost)
-  } else {
-    actionsChrome = (
-      <div className={styles.embeddedMenuFallback}>{actionsMenu}</div>
-    )
-  }
+  const actionsChrome: ReactNode = !embedded ? (
+    <div className={styles.standaloneToolbar}>
+      <h2 className={styles.title}>AI tutor</h2>
+      {actionsMenu}
+    </div>
+  ) : tutorHeaderActionsHost ? (
+    createPortal(actionsMenu, tutorHeaderActionsHost)
+  ) : (
+    <div className={styles.embeddedMenuFallback}>{actionsMenu}</div>
+  )
 
   return (
     <div className={panelClass} data-testid="ai-tutor-panel">
       {actionsChrome}
       <div className={embedded ? styles.embeddedBody : styles.standaloneBody}>
+        {speechBar}
         {transcript}
         {composer}
       </div>

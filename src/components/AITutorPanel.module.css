@@ -235,7 +235,7 @@
   --composer-send-size: 32px;
 
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   width: 100%;
   box-sizing: border-box;
   border: 1px solid #222;
@@ -273,6 +273,11 @@
   outline: none;
 }
 
+.textareaComposer:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .composerWrap:focus-within {
   outline: 2px solid #f85149;
   outline-offset: 1px;
@@ -281,11 +286,13 @@
 .composerSendRail {
   flex: 0 0 auto;
   display: flex;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
   justify-content: center;
-  align-self: stretch;
+  align-self: center;
   box-sizing: border-box;
   padding: var(--composer-padding);
+  gap: 0.35rem;
 }
 
 .sendFab {
@@ -336,4 +343,198 @@
   padding: 0.1em 0.35em;
   border-radius: 4px;
   color: #79c0ff;
+}
+
+.speechBar {
+  flex-shrink: 0;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #2a2f36;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.72rem;
+  color: #c9d1d9;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.speechBarMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.readAloudRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.readAloudCheckbox {
+  width: 0.95rem;
+  height: 0.95rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.readAloudCheckbox:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 2px;
+}
+
+.readAloudLabel {
+  cursor: pointer;
+  line-height: 1.35;
+  user-select: none;
+}
+
+.speechControlsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.speechFieldLabel {
+  flex: 0 0 auto;
+  color: #8b949e;
+}
+
+.voiceSelect {
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 100%;
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #30363d;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+.voiceSelect:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 1px;
+}
+
+.rateRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.rateLabel {
+  color: #8b949e;
+  font-size: 0.72rem;
+}
+
+.rateRange {
+  width: 100%;
+  accent-color: #f85149;
+}
+
+.rateRange:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: 2px;
+}
+
+.speechNotice {
+  margin: 0;
+  color: #d29922;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.speechFootnote {
+  margin: 0;
+  color: #6e7681;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.voiceRecError {
+  margin: 0.35rem 0 0;
+  color: #f85149;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.assistantSpeechRow {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.speechCtl {
+  font: inherit;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid #30363d;
+  background: #141414;
+  color: #8b949e;
+  cursor: pointer;
+}
+
+.speechCtl:hover {
+  border-color: #58a6ff;
+  color: #79c0ff;
+}
+
+.speechCtl:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+}
+
+.micFab {
+  position: static;
+  width: var(--composer-send-size);
+  height: var(--composer-send-size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: none;
+  display: grid;
+  place-items: center;
+  background: #21262d;
+  color: #c9d1d9;
+  cursor: pointer;
+  padding: 0;
+}
+
+.micFab:hover {
+  filter: brightness(1.08);
+}
+
+.micFab:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+}
+
+.micFab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.micFab[aria-pressed='true'] {
+  outline: 2px solid #58a6ff;
+  outline-offset: 1px;
+  color: #79c0ff;
+}
+
+.micIcon {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.smallIcon {
+  display: block;
+  width: 13px;
+  height: 13px;
 }
