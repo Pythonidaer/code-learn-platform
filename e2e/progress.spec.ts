@@ -19,7 +19,7 @@ test('dashboard to quiz challenge, complete, progress updated', async ({
   await page.locator('input[type="radio"]').nth(1).check()
   await page.getByTestId('quiz-check').click()
   await page.getByTestId('quiz-mark-complete').click()
-  await page.getByRole('link', { name: '← Back to challenges' }).click()
+  await page.getByRole('link', { name: '← Back' }).click()
 
   await expect(
     page.getByTestId('challenge-card-quiz-http-methods'),

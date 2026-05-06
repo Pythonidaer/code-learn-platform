@@ -56,7 +56,7 @@ export function TestResultsPanel({
         {results.map((r) => (
           <li
             key={r.name}
-            className={r.passed ? styles.pass : styles.fail}
+            className={`${styles.resultRow} ${r.passed ? styles.pass : styles.fail}`}
             data-testid={`test-row-${r.name}`}
           >
             <div className={styles.rowTop}>
