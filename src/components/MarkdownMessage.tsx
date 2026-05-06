@@ -1,4 +1,9 @@
-import { createContext, useContext } from 'react'
+import {
+  createContext,
+  useContext,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { normalizeTutorMarkdown } from '../utils/normalizeTutorMarkdown'
@@ -17,6 +22,31 @@ function mergeClassNames(...parts: Array<string | undefined>) {
   return parts.filter(Boolean).join(' ')
 }
 
+function MarkdownCode({
+  className,
+  children,
+  ...props
+}: HTMLAttributes<HTMLElement> & {
+  children?: ReactNode
+}) {
+  const insidePre = useContext(InsidePreContext)
+  if (insidePre) {
+    return (
+      <code
+        className={mergeClassNames(styles.codeBlock, className)}
+        {...props}
+      >
+        {children}
+      </code>
+    )
+  }
+  return (
+    <code className={styles.inlineCode} {...props}>
+      {children}
+    </code>
+  )
+}
+
 export function MarkdownMessage({ content, className }: Props) {
   return (
     <div className={mergeClassNames(styles.md, className)}>
@@ -30,24 +60,7 @@ export function MarkdownMessage({ content, className }: Props) {
               </InsidePreContext.Provider>
             )
           },
-          code({ className, children, ...props }) {
-            const insidePre = useContext(InsidePreContext)
-            if (insidePre) {
-              return (
-                <code
-                  className={mergeClassNames(styles.codeBlock, className)}
-                  {...props}
-                >
-                  {children}
-                </code>
-              )
-            }
-            return (
-              <code className={styles.inlineCode} {...props}>
-                {children}
-              </code>
-            )
-          },
+          code: MarkdownCode,
           p: ({ children }) => <p className={styles.p}>{children}</p>,
           ul: ({ children }) => <ul className={styles.ul}>{children}</ul>,
           ol: ({ children }) => <ol className={styles.ol}>{children}</ol>,
