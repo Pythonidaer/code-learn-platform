@@ -48,8 +48,8 @@
 
 .actionsGear {
   font: inherit;
-  font-size: 0.72rem;
-  padding: 0.25rem 0.45rem;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.38rem;
   line-height: 1;
   background: transparent;
   border: 1px solid #333;
@@ -74,8 +74,8 @@
 
 .gearIcon {
   display: block;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .actionsDropdown {
@@ -230,19 +230,25 @@
   margin-bottom: 0;
 }
 
+/* Slim composer — compact bar, centered text ↔ send proportions (Cursor-style). */
 .composerWrap {
-  --composer-padding: 0.5rem;
-  --composer-send-size: 32px;
+  --composer-send-size: 24px;
+  --composer-send-icon-size: calc(var(--composer-send-size) - 1px);
+  --composer-pad-x: 0.5rem;
+  --composer-pad-y: 0.3125rem;
 
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #222;
-  border-radius: 8px;
-  background: #080808;
+  gap: 0.25rem;
+  border: 1px solid #30363d;
+  border-radius: 7px;
+  background: #0d1117;
   overflow: hidden;
   min-width: 0;
+  /* One-line cap height ≈ FAB + snug vertical inset */
+  min-height: calc(var(--composer-send-size) + 2 * var(--composer-pad-y));
 }
 
 .textareaComposer {
@@ -251,14 +257,15 @@
   box-sizing: border-box;
   min-height: 0;
   max-height: 160px;
-  padding: var(--composer-padding);
+  padding: var(--composer-pad-y) var(--composer-pad-x);
+  padding-right: 0.2rem;
   background: transparent;
   color: #e6edf3;
   border: none;
   border-radius: 0;
   outline: none;
-  font-size: 0.82rem;
-  line-height: 1.38;
+  font-size: 0.8125rem;
+  line-height: 1.35;
   resize: none;
   overflow-x: hidden;
   font-family:
@@ -266,6 +273,11 @@
     system-ui,
     Segoe UI,
     sans-serif;
+}
+
+.textareaComposer::placeholder {
+  color: #6e7681;
+  opacity: 1;
 }
 
 .textareaComposer:focus,
@@ -281,11 +293,12 @@
 .composerSendRail {
   flex: 0 0 auto;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  align-self: stretch;
+  align-self: center;
   box-sizing: border-box;
-  padding: var(--composer-padding);
+  padding: var(--composer-pad-y) var(--composer-pad-x) var(--composer-pad-y)
+    0.25rem;
 }
 
 .sendFab {
@@ -297,14 +310,14 @@
   border: none;
   display: grid;
   place-items: center;
-  background: #c9ccd1;
+  background: #c9ced6;
   color: #0d1117;
   cursor: pointer;
   padding: 0;
 }
 
-.sendFab:hover {
-  filter: brightness(1.06);
+.sendFab:hover:not(:disabled) {
+  background: #d6dbe4;
 }
 
 .sendFab:focus-visible {
@@ -313,13 +326,15 @@
 }
 
 .sendFab:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
   filter: none;
 }
 
 .sendIcon {
   display: block;
+  width: var(--composer-send-icon-size);
+  height: var(--composer-send-icon-size);
 }
 
 .hint {

@@ -13,6 +13,7 @@ import type {
   Challenge,
   CodingChallenge,
   DebuggingChallenge,
+  QuizChallenge,
   ReactChallenge,
 } from '../types/challenge'
 import {
@@ -30,6 +31,7 @@ import { useProgress } from '../hooks/useProgress'
 import { AITutorPanel } from '../components/AITutorPanel'
 import { MonacoCodeEditor } from '../components/MonacoCodeEditor'
 import { TestResultsPanel } from '../components/TestResultsPanel'
+import testRowStyles from '../components/TestResultsPanel.module.css'
 import {
   allTestsPassed,
   runChallengeTests,
@@ -142,6 +144,255 @@ function InfoTooltip({ children }: { children: React.ReactNode }) {
   )
 }
 
+function useChallengeWorkspaceChromeState(tutorEnabled: boolean) {
+  const [layoutDesktop, setLayoutDesktop] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      window.innerWidth >= WORKSPACE_DESKTOP_MIN_PX,
+  )
+  const [tutorInnerWidth, setTutorInnerWidth] = useState(() => loadTutorWidth())
+  const [problemCollapsed, setProblemCollapsed] = useState(() =>
+    loadProblemCollapsed(),
+  )
+  const [tutorCollapsed, setTutorCollapsed] = useState(() =>
+    loadTutorCollapsed(),
+  )
+  const [tutorHeaderActionsHost, setTutorHeaderActionsHost] =
+    useState<HTMLSpanElement | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia(
+      `(min-width: ${WORKSPACE_DESKTOP_MIN_PX}px)`,
+    )
+    const fn = () => setLayoutDesktop(mq.matches)
+    mq.addEventListener('change', fn)
+    fn()
+    return () => mq.removeEventListener('change', fn)
+  }, [])
+
+  useEffect(() => {
+    saveTutorWidth(tutorInnerWidth)
+  }, [tutorInnerWidth])
+
+  useEffect(() => {
+    if (!tutorEnabled || !layoutDesktop) return
+    const onResize = () => {
+      setTutorInnerWidth((w) => clampTutorWidth(w, window.innerWidth))
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [tutorEnabled, layoutDesktop])
+
+  useEffect(() => {
+    saveProblemCollapsed(problemCollapsed)
+  }, [problemCollapsed])
+
+  useEffect(() => {
+    saveTutorCollapsed(tutorCollapsed)
+  }, [tutorCollapsed])
+
+  const workspaceGridStyle = layoutDesktop
+    ? {
+        gridTemplateColumns: tutorEnabled
+          ? [
+              problemCollapsed
+                ? `${PROBLEM_COLLAPSED_RAIL_PX}px`
+                : 'clamp(260px, 26vw, 440px)',
+              'minmax(0, 1fr)',
+              tutorCollapsed ? '0px' : `${TUTOR_RESIZE_HANDLE_PX}px`,
+              tutorCollapsed
+                ? `${TUTOR_COLLAPSED_RAIL_PX}px`
+                : `${tutorInnerWidth}px`,
+            ].join(' ')
+          : [
+              problemCollapsed
+                ? `${PROBLEM_COLLAPSED_RAIL_PX}px`
+                : 'clamp(260px, 26vw, 440px)',
+              'minmax(0, 1fr)',
+            ].join(' '),
+      }
+    : undefined
+
+  const beginTutorResize = useCallback(
+    (ev: ReactMouseEvent) => {
+      if (!tutorEnabled || !layoutDesktop) return
+      ev.preventDefault()
+      const startX = ev.clientX
+      const startW = tutorInnerWidth
+      const onMove = (e: MouseEvent) => {
+        const delta = startX - e.clientX
+        setTutorInnerWidth(clampTutorWidth(startW + delta, window.innerWidth))
+      }
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+      }
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+    },
+    [tutorEnabled, layoutDesktop, tutorInnerWidth],
+  )
+
+  return {
+    layoutDesktop,
+    problemCollapsed,
+    setProblemCollapsed,
+    tutorCollapsed,
+    setTutorCollapsed,
+    tutorInnerWidth,
+    tutorHeaderActionsHost,
+    setTutorHeaderActionsHost,
+    workspaceGridStyle,
+    beginTutorResize,
+  }
+}
+
+function ChallengeWorkspaceChrome({
+  tutorEnabled,
+  workspace,
+  problemScrollContent,
+  renderCenter,
+  tutor,
+}: {
+  tutorEnabled: boolean
+  workspace: ReturnType<typeof useChallengeWorkspaceChromeState>
+  problemScrollContent: React.ReactNode
+  renderCenter: () => React.ReactNode
+  tutor: (opts: {
+    tutorHeaderActionsHost: HTMLSpanElement | null
+  }) => React.ReactNode
+}) {
+  const {
+    layoutDesktop,
+    problemCollapsed,
+    setProblemCollapsed,
+    tutorCollapsed,
+    setTutorCollapsed,
+    tutorHeaderActionsHost,
+    setTutorHeaderActionsHost,
+    workspaceGridStyle,
+    beginTutorResize,
+  } = workspace
+
+  return (
+    <div
+      className={`${styles.codingWorkspace} ${layoutDesktop ? styles.codingWorkspaceDesktop : ''}`}
+      style={workspaceGridStyle}
+    >
+      {!problemCollapsed ? (
+        <aside
+          className={`${styles.wsPanel} ${styles.wsGridProblem}`}
+          aria-label="Problem statement"
+        >
+          <div
+            className={`${styles.wsPanelHeader} ${styles.wsPanelHeaderProblem}`}
+          >
+            <span className={styles.wsPanelTitle}>Problem</span>
+            <button
+              type="button"
+              className={styles.wsPanelHeaderCollapseBtn}
+              aria-label="Collapse problem instructions"
+              title="Collapse problem instructions"
+              data-testid="toggle-problem-panel"
+              onClick={() => setProblemCollapsed(true)}
+            >
+              ◀
+            </button>
+          </div>
+          <div className={styles.wsPanelBodyScroll}>{problemScrollContent}</div>
+        </aside>
+      ) : (
+        <div
+          className={`${styles.wsPanel} ${styles.wsProblemRail} ${styles.wsGridProblem}`}
+        >
+          <div className={styles.wsProblemRailHeader}>
+            <button
+              type="button"
+              className={styles.wsPanelHeaderCollapseBtn}
+              aria-label="Expand problem instructions"
+              title="Expand problem instructions"
+              data-testid="toggle-problem-panel"
+              onClick={() => setProblemCollapsed(false)}
+            >
+              ▶
+            </button>
+          </div>
+        </div>
+      )}
+
+      {renderCenter()}
+
+      {tutorEnabled && layoutDesktop && !tutorCollapsed ? (
+        <button
+          type="button"
+          className={`${styles.resizeHandleColCell} ${styles.wsGridResize}`}
+          aria-label="Resize AI Tutor panel"
+          title="Resize AI Tutor panel"
+          data-testid="resize-ai-tutor"
+          onMouseDown={beginTutorResize}
+        />
+      ) : null}
+
+      {tutorEnabled && tutorCollapsed ? (
+        <div
+          className={`${styles.wsPanel} ${styles.wsTutorRail} ${styles.wsGridTutor}`}
+        >
+          <div className={styles.wsTutorRailHeader}>
+            <button
+              type="button"
+              className={styles.wsPanelHeaderCollapseBtn}
+              aria-label="Expand AI tutor"
+              title="Expand AI tutor"
+              data-testid="toggle-tutor-panel"
+              onClick={() => setTutorCollapsed(false)}
+            >
+              ◀
+            </button>
+          </div>
+        </div>
+      ) : tutorEnabled ? (
+        <aside
+          className={`${styles.wsPanel} ${styles.wsGridTutor}`}
+          aria-label="AI tutor"
+        >
+          <div
+            className={`${styles.wsPanelHeader} ${styles.wsPanelHeaderTutor}`}
+          >
+            <button
+              type="button"
+              className={styles.wsPanelHeaderCollapseBtn}
+              aria-label="Collapse AI tutor"
+              title="Collapse AI tutor"
+              data-testid="toggle-tutor-panel"
+              onClick={() => setTutorCollapsed(true)}
+            >
+              ▶
+            </button>
+            <span className={styles.wsTutorTitleGroup}>
+              <span className={styles.wsPanelTitle}>AI Tutor</span>
+              <InfoTooltip>
+                <strong>Current model</strong><br />
+                Local Ollama via <code>VITE_OLLAMA_MODEL</code>.<br />
+                Set that env var to match your <code>ollama&nbsp;list</code> output.<br />
+                <br />
+                <strong>Coming soon</strong><br />
+                OpenAI API key support — swap the provider without changing your code.
+              </InfoTooltip>
+            </span>
+            <span
+              ref={setTutorHeaderActionsHost}
+              className={styles.wsTutorHeaderActions}
+            />
+          </div>
+          <div className={styles.wsTutorBody}>
+            {tutor({ tutorHeaderActionsHost })}
+          </div>
+        </aside>
+      ) : null}
+    </div>
+  )
+}
+
 function CodingOrDebuggingView({
   challenge,
 }: {
@@ -180,61 +431,17 @@ function CodingOrDebuggingView({
   )
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  const [layoutDesktop, setLayoutDesktop] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.innerWidth >= WORKSPACE_DESKTOP_MIN_PX,
-  )
-  const [tutorInnerWidth, setTutorInnerWidth] = useState(() => loadTutorWidth())
   const [consoleHeight, setConsoleHeight] = useState(() => loadConsoleHeight())
-  const [problemCollapsed, setProblemCollapsed] = useState(() =>
-    loadProblemCollapsed(),
-  )
-  const [tutorCollapsed, setTutorCollapsed] = useState(() =>
-    loadTutorCollapsed(),
-  )
-  const [tutorHeaderActionsHost, setTutorHeaderActionsHost] =
-    useState<HTMLSpanElement | null>(null)
   const [centerMaxConsole, setCenterMaxConsole] = useState(480)
 
   const tutorEnabled = ENABLE_AI_TUTOR
+  const workspace = useChallengeWorkspaceChromeState(tutorEnabled)
 
   const centerMainRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    const mq = window.matchMedia(
-      `(min-width: ${WORKSPACE_DESKTOP_MIN_PX}px)`,
-    )
-    const fn = () => setLayoutDesktop(mq.matches)
-    mq.addEventListener('change', fn)
-    fn()
-    return () => mq.removeEventListener('change', fn)
-  }, [])
-
-  useEffect(() => {
-    saveTutorWidth(tutorInnerWidth)
-  }, [tutorInnerWidth])
-
-  useEffect(() => {
-    if (!tutorEnabled || !layoutDesktop) return
-    const onResize = () => {
-      setTutorInnerWidth((w) => clampTutorWidth(w, window.innerWidth))
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [tutorEnabled, layoutDesktop])
-
-  useEffect(() => {
     saveConsoleHeight(consoleHeight)
   }, [consoleHeight])
-
-  useEffect(() => {
-    saveProblemCollapsed(problemCollapsed)
-  }, [problemCollapsed])
-
-  useEffect(() => {
-    saveTutorCollapsed(tutorCollapsed)
-  }, [tutorCollapsed])
 
   useEffect(() => {
     const mainEl = centerMainRef.current
@@ -242,7 +449,7 @@ function CodingOrDebuggingView({
     const update = () => {
       const maxH = maxConsoleHeightForCenterPanel(mainEl.clientHeight)
       setCenterMaxConsole(maxH)
-      if (layoutDesktop) {
+      if (workspace.layoutDesktop) {
         setConsoleHeight((h) => clampConsoleHeight(h, maxH))
       }
     }
@@ -250,31 +457,16 @@ function CodingOrDebuggingView({
     const ro = new ResizeObserver(update)
     ro.observe(mainEl)
     return () => ro.disconnect()
-  }, [layoutDesktop, problemCollapsed, tutorEnabled, tutorInnerWidth])
-
-  const beginTutorResize = useCallback(
-    (ev: ReactMouseEvent) => {
-      if (!tutorEnabled || !layoutDesktop) return
-      ev.preventDefault()
-      const startX = ev.clientX
-      const startW = tutorInnerWidth
-      const onMove = (e: MouseEvent) => {
-        const delta = startX - e.clientX
-        setTutorInnerWidth(clampTutorWidth(startW + delta, window.innerWidth))
-      }
-      const onUp = () => {
-        document.removeEventListener('mousemove', onMove)
-        document.removeEventListener('mouseup', onUp)
-      }
-      document.addEventListener('mousemove', onMove)
-      document.addEventListener('mouseup', onUp)
-    },
-    [tutorEnabled, layoutDesktop, tutorInnerWidth],
-  )
+  }, [
+    workspace.layoutDesktop,
+    workspace.problemCollapsed,
+    workspace.tutorInnerWidth,
+    tutorEnabled,
+  ])
 
   const beginConsoleResize = useCallback(
     (ev: ReactMouseEvent) => {
-      if (!layoutDesktop) return
+      if (!workspace.layoutDesktop) return
       ev.preventDefault()
       const startY = ev.clientY
       const startH = consoleHeight
@@ -299,7 +491,7 @@ function CodingOrDebuggingView({
       document.addEventListener('mousemove', onMove)
       document.addEventListener('mouseup', onUp)
     },
-    [layoutDesktop, consoleHeight, centerMaxConsole],
+    [workspace.layoutDesktop, consoleHeight, centerMaxConsole],
   )
 
   const onCodeChange = useCallback(
@@ -474,7 +666,7 @@ function CodingOrDebuggingView({
           <ul className={styles.wsList}>
             {challenge.examples.map((ex) => (
               <li key={ex.slice(0, 40)}>
-                <MarkdownMessage content={ex} className={markdownStyles.problemMuted} />
+                <MarkdownMessage content={ex} className={markdownStyles.problemPanel} />
               </li>
             ))}
           </ul>
@@ -483,10 +675,10 @@ function CodingOrDebuggingView({
       {challenge.constraints?.length ? (
         <section className={styles.wsBlock}>
           <h2 className={styles.wsLabel}>Constraints</h2>
-          <ul className={styles.wsMutedList}>
+          <ul className={styles.wsList}>
             {challenge.constraints.map((c) => (
               <li key={c}>
-                <MarkdownMessage content={c} className={markdownStyles.problemMuted} />
+                <MarkdownMessage content={c} className={markdownStyles.problemPanel} />
               </li>
             ))}
           </ul>
@@ -554,76 +746,18 @@ function CodingOrDebuggingView({
     </>
   )
 
-  /* Problem: capped width; center: all remaining space; tutor: fixed or collapsed rail (optional). */
-  const workspaceGridStyle = layoutDesktop
-    ? {
-        gridTemplateColumns: tutorEnabled
-          ? [
-              problemCollapsed ? `${PROBLEM_COLLAPSED_RAIL_PX}px` : 'clamp(260px, 26vw, 440px)',
-              'minmax(0, 1fr)',
-              tutorCollapsed ? '0px' : `${TUTOR_RESIZE_HANDLE_PX}px`,
-              tutorCollapsed ? `${TUTOR_COLLAPSED_RAIL_PX}px` : `${tutorInnerWidth}px`,
-            ].join(' ')
-          : [
-              problemCollapsed ? `${PROBLEM_COLLAPSED_RAIL_PX}px` : 'clamp(260px, 26vw, 440px)',
-              'minmax(0, 1fr)',
-            ].join(' '),
-      }
-    : undefined
-
-  /* Desktop: grid rows = editor | actions bar | splitter | console. */
-  const centerMainGridStyle = layoutDesktop
+  const centerMainGridStyle = workspace.layoutDesktop
     ? {
         gridTemplateRows: `minmax(120px, 1fr) ${CENTER_EDITOR_ACTIONS_BAR_PX}px 6px ${consoleHeight}px`,
       }
     : undefined
 
   return (
-    <div
-      className={`${styles.codingWorkspace} ${layoutDesktop ? styles.codingWorkspaceDesktop : ''}`}
-      style={workspaceGridStyle}
-    >
-      {!problemCollapsed ? (
-        <aside
-          className={`${styles.wsPanel} ${styles.wsGridProblem}`}
-          aria-label="Problem statement"
-        >
-          <div
-            className={`${styles.wsPanelHeader} ${styles.wsPanelHeaderProblem}`}
-          >
-            <span className={styles.wsPanelTitle}>Problem</span>
-            <button
-              type="button"
-              className={styles.wsPanelHeaderCollapseBtn}
-              aria-label="Collapse problem instructions"
-              title="Collapse problem instructions"
-              data-testid="toggle-problem-panel"
-              onClick={() => setProblemCollapsed(true)}
-            >
-              ◀
-            </button>
-          </div>
-          <div className={styles.wsPanelBodyScroll}>{problemBody}</div>
-        </aside>
-      ) : (
-        <div
-          className={`${styles.wsPanel} ${styles.wsProblemRail} ${styles.wsGridProblem}`}
-        >
-          <div className={styles.wsProblemRailHeader}>
-            <button
-              type="button"
-              className={styles.wsPanelHeaderCollapseBtn}
-              aria-label="Expand problem instructions"
-              title="Expand problem instructions"
-              data-testid="toggle-problem-panel"
-              onClick={() => setProblemCollapsed(false)}
-            >
-              ▶
-            </button>
-          </div>
-        </div>
-      )}
-
+    <ChallengeWorkspaceChrome
+      tutorEnabled={tutorEnabled}
+      workspace={workspace}
+      problemScrollContent={problemBody}
+      renderCenter={() => (
       <section
         className={`${styles.wsPanel} ${styles.wsPanelCenter} ${styles.wsGridCenter}`}
         aria-label="Editor and test output"
@@ -746,7 +880,7 @@ function CodingOrDebuggingView({
           </div>
 
           {/* Resize handle (6px): directly above Test output — keep clear hit target for drag */}
-          {layoutDesktop ? (
+          {workspace.layoutDesktop ? (
             <button
               type="button"
               className={styles.resizeHandleRow}
@@ -771,173 +905,392 @@ function CodingOrDebuggingView({
           </div>
         </div>
       </section>
-
-      {tutorEnabled && layoutDesktop && !tutorCollapsed ? (
-        <button
-          type="button"
-          className={`${styles.resizeHandleColCell} ${styles.wsGridResize}`}
-          aria-label="Resize AI Tutor panel"
-          title="Resize AI Tutor panel"
-          data-testid="resize-ai-tutor"
-          onMouseDown={beginTutorResize}
+      )}
+      tutor={({ tutorHeaderActionsHost }) => (
+        <AITutorPanel
+          challenge={challenge}
+          userCodeOrAnswer={code}
+          testRunSummary={testSummaryForAi}
+          testRunPhase={testRunPhase}
+          allVisibleTestsPassed={allVisiblePass}
+          allTestsIncludingHiddenPassed={submitAllPass}
+          embedded
+          tutorHeaderActionsHost={tutorHeaderActionsHost}
         />
-      ) : null}
-
-      {tutorEnabled && tutorCollapsed ? (
-        <div
-          className={`${styles.wsPanel} ${styles.wsTutorRail} ${styles.wsGridTutor}`}
-        >
-          <div className={styles.wsTutorRailHeader}>
-            <button
-              type="button"
-              className={styles.wsPanelHeaderCollapseBtn}
-              aria-label="Expand AI tutor"
-              title="Expand AI tutor"
-              data-testid="toggle-tutor-panel"
-              onClick={() => setTutorCollapsed(false)}
-            >
-              ◀
-            </button>
-          </div>
-        </div>
-      ) : tutorEnabled ? (
-        <aside
-          className={`${styles.wsPanel} ${styles.wsGridTutor}`}
-          aria-label="AI tutor"
-        >
-          <div
-            className={`${styles.wsPanelHeader} ${styles.wsPanelHeaderTutor}`}
-          >
-            <button
-              type="button"
-              className={styles.wsPanelHeaderCollapseBtn}
-              aria-label="Collapse AI tutor"
-              title="Collapse AI tutor"
-              data-testid="toggle-tutor-panel"
-              onClick={() => setTutorCollapsed(true)}
-            >
-              ▶
-            </button>
-            {/* Title + info icon together in the centre */}
-            <span className={styles.wsTutorTitleGroup}>
-              <span className={styles.wsPanelTitle}>AI Tutor</span>
-              <InfoTooltip>
-                <strong>Current model</strong><br />
-                Local Ollama via <code>VITE_OLLAMA_MODEL</code>.<br />
-                Set that env var to match your <code>ollama&nbsp;list</code> output.<br />
-                <br />
-                <strong>Coming soon</strong><br />
-                OpenAI API key support — swap the provider without changing your code.
-              </InfoTooltip>
-            </span>
-            {/* Settings slot: same flex footprint as collapse btn keeps title centred */}
-            <span
-              ref={setTutorHeaderActionsHost}
-              className={styles.wsTutorHeaderActions}
-            />
-          </div>
-          <div className={styles.wsTutorBody}>
-            <AITutorPanel
-              challenge={challenge}
-              userCodeOrAnswer={code}
-              testRunSummary={testSummaryForAi}
-              testRunPhase={testRunPhase}
-              allVisibleTestsPassed={allVisiblePass}
-              allTestsIncludingHiddenPassed={submitAllPass}
-              embedded
-              tutorHeaderActionsHost={tutorHeaderActionsHost}
-            />
-          </div>
-        </aside>
-      ) : null}
-    </div>
+      )}
+    />
   )
 }
 
-function QuizView({ challenge }: { challenge: import('../types/challenge').QuizChallenge }) {
-  const { markComplete, isComplete } = useProgress()
+function QuizWorkspaceView({ challenge }: { challenge: QuizChallenge }) {
+  const { markComplete, removeComplete, clearSavedCodeFor, isComplete } =
+    useProgress()
   const [quizChoice, setQuizChoice] = useState<number | null>(null)
-  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  /** Last choice index verified with "Check answer" (null = never checked). */
+  const [checkedAgainstChoice, setCheckedAgainstChoice] = useState<
+    number | null
+  >(null)
+  const [consoleHeight, setConsoleHeight] = useState(() => loadConsoleHeight())
+  const [centerMaxConsole, setCenterMaxConsole] = useState(480)
+
   const done = isComplete(challenge.id)
+
+  const tutorEnabled = ENABLE_AI_TUTOR
+  const workspace = useChallengeWorkspaceChromeState(tutorEnabled)
+
+  const quizCenterMainRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    saveConsoleHeight(consoleHeight)
+  }, [consoleHeight])
+
+  useEffect(() => {
+    const mainEl = quizCenterMainRef.current
+    if (!mainEl) return
+    const update = () => {
+      const maxH = maxConsoleHeightForCenterPanel(mainEl.clientHeight)
+      setCenterMaxConsole(maxH)
+      if (workspace.layoutDesktop) {
+        setConsoleHeight((h) => clampConsoleHeight(h, maxH))
+      }
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(mainEl)
+    return () => ro.disconnect()
+  }, [
+    workspace.layoutDesktop,
+    workspace.problemCollapsed,
+    workspace.tutorInnerWidth,
+    tutorEnabled,
+  ])
+
+  const beginQuizConsoleResize = useCallback(
+    (ev: ReactMouseEvent) => {
+      if (!workspace.layoutDesktop) return
+      ev.preventDefault()
+      const startY = ev.clientY
+      const startH = consoleHeight
+      const onMove = (e: MouseEvent) => {
+        const delta = e.clientY - startY
+        const mainEl = quizCenterMainRef.current
+        const maxH = mainEl
+          ? Math.max(
+              CONSOLE_HEIGHT_MIN,
+              mainEl.clientHeight - CONSOLE_RESERVE_ABOVE_PX,
+            )
+          : centerMaxConsole
+        setConsoleHeight(clampConsoleHeight(startH - delta, maxH))
+      }
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+      }
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+    },
+    [workspace.layoutDesktop, consoleHeight, centerMaxConsole],
+  )
+
+  const feedbackInSync =
+    checkedAgainstChoice !== null &&
+    quizChoice !== null &&
+    quizChoice === checkedAgainstChoice
 
   const tutorUser =
     quizChoice == null
       ? ''
       : `Selected answer index: ${quizChoice} (${challenge.choices[quizChoice]})`
 
-  return (
-    <>
-      <section className={styles.prompt}>{challenge.question}</section>
-      <ul className={styles.quizChoices}>
-        {challenge.choices.map((choice, idx) => (
-          <li key={choice}>
-            <label>
-              <input
-                type="radio"
-                name="quiz"
-                checked={quizChoice === idx}
-                onChange={() => setQuizChoice(idx)}
-                disabled={quizSubmitted}
-              />
-              {choice}
-            </label>
-          </li>
-        ))}
-      </ul>
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.btn}
-          disabled={quizChoice === null || quizSubmitted}
-          onClick={() => setQuizSubmitted(true)}
-          data-testid="quiz-check"
-        >
-          Check answer
-        </button>
-        <button
-          type="button"
-          className={styles.btnPrimary}
-          disabled={!quizSubmitted}
-          onClick={() => markComplete(challenge.id)}
-          data-testid="quiz-mark-complete"
-        >
-          Mark complete
-        </button>
-      </div>
-      {quizSubmitted && quizChoice !== null ? (
-        <div className={styles.reveal}>
-          <p
-            className={
-              quizChoice === challenge.correctIndex
-                ? styles.feedbackOk
-                : styles.feedbackBad
-            }
-          >
-            {quizChoice === challenge.correctIndex ? 'Correct.' : 'Incorrect.'}
-          </p>
-          <p>{challenge.explanation}</p>
+  const problemBody = useMemo(
+    () => (
+      <>
+        <Link to="/challenges" className={styles.wsBack}>
+          ← Back
+        </Link>
+        <h1 className={styles.wsTitle}>{challenge.title}</h1>
+        <div className={styles.wsBadges}>
+          <span className={styles.wsBadgeDiff}>{challenge.difficulty}</span>
+          <span className={styles.wsBadgeMeta}>{challenge.type}</span>
+          <span className={styles.wsBadgeMeta}>{challenge.category}</span>
+          {done ? <span className={styles.wsBadgeDone}>Done</span> : null}
         </div>
-      ) : null}
-      {done ? <p className={styles.feedbackOk}>Marked complete.</p> : null}
-      {ENABLE_AI_TUTOR ? (
-        <details className={styles.tutorDetails} open>
-          <summary>AI tutor</summary>
-          <div className={styles.tutorSection}>
-            <AITutorPanel
-              challenge={challenge}
-              userCodeOrAnswer={tutorUser}
-              testRunPhase="never"
-            />
+        <section className={styles.wsBlock}>
+          <h2 className={styles.wsLabel}>Problem</h2>
+          <MarkdownMessage
+            content={challenge.question}
+            className={markdownStyles.problemPanel}
+          />
+        </section>
+      </>
+    ),
+    [challenge, done],
+  )
+
+  const clearSavedAnswer = () => {
+    if (
+      !window.confirm(
+        'Clear your saved code for this challenge? This cannot be undone.',
+      )
+    )
+      return
+    clearSavedCodeFor(challenge.id)
+    setQuizChoice(null)
+    setCheckedAgainstChoice(null)
+  }
+
+  const clearCompletion = () => {
+    if (
+      !window.confirm('Remove completion status for this challenge?')
+    )
+      return
+    removeComplete(challenge.id)
+  }
+
+  const statusLabel = done
+    ? 'Completed'
+    : feedbackInSync
+      ? checkedAgainstChoice === challenge.correctIndex
+        ? 'Correct'
+        : 'Incorrect'
+      : 'In progress'
+
+  const statusClass =
+    done ||
+    (feedbackInSync && checkedAgainstChoice === challenge.correctIndex)
+      ? styles.wsStatusDone
+      : styles.wsStatusPill
+
+  const quizCenterMainGridStyle = workspace.layoutDesktop
+    ? {
+        gridTemplateRows: `minmax(120px, 1fr) ${CENTER_EDITOR_ACTIONS_BAR_PX}px 6px ${consoleHeight}px`,
+      }
+    : undefined
+
+  return (
+    <ChallengeWorkspaceChrome
+      tutorEnabled={tutorEnabled}
+      workspace={workspace}
+      problemScrollContent={problemBody}
+      renderCenter={() => (
+        <section
+          className={`${styles.wsPanel} ${styles.wsPanelCenter} ${styles.wsGridCenter}`}
+          aria-label="Quiz"
+        >
+          <div className={styles.wsPanelHeader}>
+            <span className={styles.wsFileTab}>quiz</span>
+            <span className={statusClass}>{statusLabel}</span>
           </div>
-        </details>
-      ) : null}
-    </>
+
+          <div
+            ref={quizCenterMainRef}
+            className={styles.wsCenterMain}
+            style={quizCenterMainGridStyle}
+          >
+            <div className={styles.wsEditorArea}>
+              {done ? (
+                <p className={styles.wsBannerOk} role="status">
+                  Challenge marked complete.
+                </p>
+              ) : null}
+
+              <div className={styles.wsQuizScroll}>
+                <section className={styles.wsQuizSection}>
+                  <h2 className={styles.wsLabel}>Answer</h2>
+                  <ul
+                    className={testRowStyles.list}
+                    role="radiogroup"
+                    aria-label="Answer choices"
+                  >
+                    {challenge.choices.map((choice, idx) => (
+                      <li key={`${idx}-${choice.slice(0, 48)}`}>
+                        <label
+                          className={[
+                            styles.wsQuizAnswerLabel,
+                            testRowStyles.resultRow,
+                            !done
+                              ? testRowStyles.resultRowInteractive
+                              : testRowStyles.resultRowLocked,
+                            !done && quizChoice === idx
+                              ? testRowStyles.resultRowSelected
+                              : '',
+                            feedbackInSync && idx === challenge.correctIndex
+                              ? testRowStyles.pass
+                              : '',
+                            feedbackInSync &&
+                              checkedAgainstChoice === idx &&
+                              idx !== challenge.correctIndex
+                              ? testRowStyles.fail
+                              : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                        >
+                          <input
+                            type="radio"
+                            name={`quiz-${challenge.id}`}
+                            className={styles.quizSrOnly}
+                            checked={quizChoice === idx}
+                            onChange={() => setQuizChoice(idx)}
+                            disabled={done}
+                          />
+                          <div
+                            className={
+                              feedbackInSync
+                                ? styles.quizAnswerRowSpread
+                                : testRowStyles.rowTop
+                            }
+                          >
+                            {feedbackInSync ? (
+                              <>
+                                <span className={testRowStyles.name}>
+                                  {choice}
+                                </span>
+                                {idx === challenge.correctIndex ? (
+                                  <span
+                                    className={`${testRowStyles.badge} ${styles.quizAnswerStatus}`}
+                                  >
+                                    PASS
+                                  </span>
+                                ) : checkedAgainstChoice === idx ? (
+                                  <span
+                                    className={`${testRowStyles.badge} ${styles.quizAnswerStatus}`}
+                                  >
+                                    FAIL
+                                  </span>
+                                ) : null}
+                              </>
+                            ) : (
+                              <span className={testRowStyles.name}>
+                                {choice}
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+            </div>
+
+            <div
+              className={styles.wsEditorActionsBar}
+              role="toolbar"
+              aria-label="Quiz actions"
+            >
+              <div className={styles.wsEditorActionsGroup}>
+                <button
+                  type="button"
+                  className={styles.wsBtnGhost}
+                  onClick={clearSavedAnswer}
+                >
+                  Clear saved answer
+                </button>
+                {done ? (
+                  <button
+                    type="button"
+                    className={styles.wsBtnGhost}
+                    onClick={clearCompletion}
+                  >
+                    Clear completion
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className={styles.wsBtnRun}
+                  disabled={quizChoice === null || done}
+                  onClick={() => {
+                    if (quizChoice === null) return
+                    setCheckedAgainstChoice(quizChoice)
+                  }}
+                  data-testid="quiz-check"
+                >
+                  Check answer
+                </button>
+                <button
+                  type="button"
+                  className={styles.wsBtnSubmit}
+                  disabled={!feedbackInSync || done}
+                  onClick={() => markComplete(challenge.id)}
+                  data-testid="quiz-mark-complete"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+
+            {workspace.layoutDesktop ? (
+              <button
+                type="button"
+                className={styles.resizeHandleRow}
+                aria-label="Resize quiz result panel"
+                title="Resize quiz result panel"
+                data-testid="resize-quiz-feedback"
+                onMouseDown={beginQuizConsoleResize}
+              />
+            ) : null}
+
+            <div className={styles.wsConsole}>
+              <div className={styles.wsConsoleHead}>Quiz result</div>
+              <div className={styles.wsConsoleBody} data-testid="quiz-feedback">
+                <div
+                  className={`${testRowStyles.console} ${testRowStyles.consoleTerminal}`}
+                >
+                  {quizChoice === null ? (
+                    <p className={testRowStyles.consoleIdle}>
+                      Choose an answer, then Check answer to see feedback here.
+                    </p>
+                  ) : checkedAgainstChoice !== null &&
+                    quizChoice !== checkedAgainstChoice ? (
+                    <p className={testRowStyles.consoleIdle}>
+                      Your selection changed. Click Check answer to update
+                      feedback.
+                    </p>
+                  ) : feedbackInSync ? (
+                    <>
+                      <div
+                        className={
+                          checkedAgainstChoice === challenge.correctIndex
+                            ? testRowStyles.consoleOverallOk
+                            : testRowStyles.consoleOverallWarn
+                        }
+                        data-testid="quiz-result-summary"
+                      >
+                        {checkedAgainstChoice === challenge.correctIndex
+                          ? '[OK] Correct.'
+                          : '[FAIL] Incorrect.'}
+                      </div>
+                      <MarkdownMessage
+                        content={challenge.explanation}
+                        className={markdownStyles.problemMuted}
+                      />
+                    </>
+                  ) : (
+                    <p className={testRowStyles.consoleIdle}>
+                      Click Check answer to see feedback for your selection.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+      tutor={({ tutorHeaderActionsHost }) => (
+        <AITutorPanel
+          challenge={challenge}
+          userCodeOrAnswer={tutorUser}
+          testRunPhase="never"
+          embedded
+          tutorHeaderActionsHost={tutorHeaderActionsHost}
+        />
+      )}
+    />
   )
 }
 
 function ChallengeDetailInner({ challenge }: { challenge: Challenge }) {
-  const done = useProgress().isComplete(challenge.id)
-
   if (
     isCodingChallenge(challenge) ||
     isDebuggingChallenge(challenge) ||
@@ -946,22 +1299,16 @@ function ChallengeDetailInner({ challenge }: { challenge: Challenge }) {
     return <CodingOrDebuggingView challenge={challenge} />
   }
 
+  if (isQuizChallenge(challenge)) {
+    return <QuizWorkspaceView challenge={challenge} />
+  }
+
   return (
     <div className={styles.detail}>
       <Link to="/challenges" className={styles.back}>
         ← Back to challenges
       </Link>
-      <div className={styles.titleRow}>
-        <h1>{challenge.title}</h1>
-        <div className={styles.meta}>
-          <span>{challenge.type}</span>
-          <span>{challenge.category}</span>
-          <span>{challenge.difficulty}</span>
-          {done ? <span>Completed</span> : null}
-        </div>
-      </div>
-
-      {isQuizChallenge(challenge) ? <QuizView challenge={challenge} /> : null}
+      <p className={styles.notFound}>Unsupported challenge type.</p>
     </div>
   )
 }
