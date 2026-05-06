@@ -61,21 +61,25 @@
   color: #58a6ff;
 }
 
-/* Challenge workspace problem panel — typography matches `.wsProse` / muted lists */
+/* Challenge workspace problem panel — high-contrast body (matches `.wsProse` / lists) */
 .problemPanel {
   font-size: 0.88rem;
   line-height: 1.55;
-  color: #c9d1d9;
+  color: #f0f3f8;
   white-space: pre-wrap;
+}
+
+.problemPanel .h {
+  color: #e6edf3;
 }
 
 .problemMuted {
   font-size: 0.82rem;
   line-height: 1.45;
-  color: #8b949e;
+  color: #c9d1d9;
 }
 
 .problemMuted strong {
-  color: #c9d1d9;
+  color: #f0f3f8;
   font-weight: 650;
 }

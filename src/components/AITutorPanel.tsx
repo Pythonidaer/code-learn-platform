@@ -86,13 +86,10 @@ function completedTurnPairs(
 function ArrowUpSendIcon() {
   return (
     <svg className={styles.sendIcon} viewBox="0 0 24 24" aria-hidden>
+      {/* Cursor-style: one filled silhouette (narrow stem + chevron head) — no stroke gaps. */}
       <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 17V9m0 0-4 4m4-4 4 4"
+        fill="currentColor"
+        d="M12 4.65 L18.35 12.05 L13.58 12.05 L13.58 19.5 L10.42 19.5 L10.42 12.05 L5.65 12.05 Z"
       />
     </svg>
   )
