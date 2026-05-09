@@ -17,7 +17,10 @@ import type {
   TestRunPhase,
   TutorShortcutIntent,
 } from '../types/ai'
-import type { TutorThreadMessage } from '../utils/progressStorage'
+import {
+  clearAiTutorCache,
+  type TutorThreadMessage,
+} from '../utils/progressStorage'
 import { MarkdownMessage } from './MarkdownMessage'
 import { useProgress } from '../hooks/useProgress'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
@@ -285,6 +288,17 @@ export function AITutorPanel({
     ro.observe(wrap)
     return () => ro.disconnect()
   }, [syncComposerHeight])
+
+  useLayoutEffect(() => {
+    voiceRec.stop()
+    speech.stop()
+    clearAiTutorCache(challenge.id)
+    setMessages([])
+    setInput('')
+    setError(null)
+    setLoading(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset when navigating to this challenge id
+  }, [challenge.id])
 
   useEffect(() => {
     startTransition(() => {

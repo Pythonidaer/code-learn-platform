@@ -908,6 +908,7 @@ function CodingOrDebuggingView({
       )}
       tutor={({ tutorHeaderActionsHost }) => (
         <AITutorPanel
+          key={challenge.id}
           challenge={challenge}
           userCodeOrAnswer={code}
           testRunSummary={testSummaryForAi}
@@ -1279,6 +1280,7 @@ function QuizWorkspaceView({ challenge }: { challenge: QuizChallenge }) {
       )}
       tutor={({ tutorHeaderActionsHost }) => (
         <AITutorPanel
+          key={challenge.id}
           challenge={challenge}
           userCodeOrAnswer={tutorUser}
           testRunPhase="never"

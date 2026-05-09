@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { ProgressProvider } from '../context/ProgressProvider'
 import { AITutorPanel } from './AITutorPanel'
 import type { CodingChallenge } from '../types/challenge'
+import { clearAllAiTutorCache, setAiTutorThread } from '../utils/progressStorage'
 
 vi.mock('../ai/askAI', () => ({
   askAI: vi.fn(),
@@ -90,11 +91,31 @@ function removeSpeechSynthesis() {
 describe('AITutorPanel speech UI', () => {
   beforeEach(() => {
     mockedAskAI.mockReset()
+    clearAllAiTutorCache()
   })
 
   afterEach(() => {
     cleanup()
     removeSpeechSynthesis()
+    clearAllAiTutorCache()
+  })
+
+  it('starts without previously cached tutor turns for this challenge', () => {
+    setAiTutorThread('tutor-test-challenge', [
+      { role: 'user', content: 'Old question' },
+      { role: 'assistant', content: 'Old answer' },
+    ])
+    render(
+      <Wrapper>
+        <AITutorPanel challenge={codingChallenge} />
+      </Wrapper>,
+    )
+
+    expect(screen.queryByText('Old question')).not.toBeInTheDocument()
+    expect(screen.queryByText('Old answer')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/Use the tutor menu \(⚙\) or type below/i),
+    ).toBeVisible()
   })
 
   it('shows read-aloud toggle and Speak on assistant replies when SpeechSynthesis exists', async () => {
