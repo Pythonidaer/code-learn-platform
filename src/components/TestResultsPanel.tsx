@@ -1,4 +1,7 @@
-import type { ChallengeTestResult } from '../utils/runChallengeTests'
+import type {
+  CapturedConsoleLine,
+  ChallengeTestResult,
+} from '../utils/runChallengeTests'
 import { allTestsPassed } from '../utils/runChallengeTests'
 import styles from './TestResultsPanel.module.css'
 
@@ -85,6 +88,53 @@ export function TestResultsPanel({
           {hiddenSummary}
         </p>
       ) : null}
+    </div>
+  )
+}
+
+export function CapturedConsolePanel({
+  lines,
+  loading,
+}: {
+  lines: CapturedConsoleLine[]
+  loading?: boolean
+}) {
+  const consoleCls = `${styles.console} ${styles.consoleTerminal}`
+
+  if (loading) {
+    return (
+      <div className={consoleCls} data-testid="user-console-output">
+        <p className={styles.consoleIdle}>Running tests…</p>
+      </div>
+    )
+  }
+
+  if (!lines.length) {
+    return (
+      <div className={consoleCls} data-testid="user-console-output">
+        <p className={styles.consoleIdle}>
+          Output from <code className={styles.inlineCodeHint}>console.log</code>,{' '}
+          <code className={styles.inlineCodeHint}>console.warn</code>, etc. appears
+          here after Run Code or Submit — same logs still go to DevTools for
+          debugging.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className={consoleCls} data-testid="user-console-output">
+      <ul className={styles.consoleLineList} aria-label="Captured console lines">
+        {lines.map((line, i) => (
+          <li
+            key={i}
+            className={styles.consoleLine}
+            data-level={line.level}
+          >
+            {line.text}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

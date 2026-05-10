@@ -30,12 +30,16 @@ import type { TestRunPhase } from '../types/ai'
 import { useProgress } from '../hooks/useProgress'
 import { AITutorPanel } from '../components/AITutorPanel'
 import { MonacoCodeEditor } from '../components/MonacoCodeEditor'
-import { TestResultsPanel } from '../components/TestResultsPanel'
+import {
+  CapturedConsolePanel,
+  TestResultsPanel,
+} from '../components/TestResultsPanel'
 import testRowStyles from '../components/TestResultsPanel.module.css'
 import {
   allTestsPassed,
   runChallengeTests,
   summarizeTestResults,
+  type CapturedConsoleLine,
   type ChallengeTestResult,
 } from '../utils/runChallengeTests'
 import {
@@ -419,6 +423,12 @@ function CodingOrDebuggingView({
   const [displayResults, setDisplayResults] = useState<
     ChallengeTestResult[] | null
   >(null)
+  const [capturedConsoleLines, setCapturedConsoleLines] = useState<
+    CapturedConsoleLine[]
+  >([])
+  const [workspaceOutputTab, setWorkspaceOutputTab] = useState<
+    'tests' | 'console'
+  >('tests')
   const [running, setRunning] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [hiddenSummary, setHiddenSummary] = useState<string | null>(null)
@@ -511,21 +521,24 @@ function CodingOrDebuggingView({
   }, [code, challenge.id, setSavedCode])
 
   const testSummaryForAi = useMemo(() => {
-    if (!displayResults?.length) return 'Tests have not been run yet in this session.'
+    if (!displayResults?.length)
+      return 'Tests have not been run yet in this session.'
     return summarizeTestResults(displayResults)
   }, [displayResults])
 
   const handleRunTests = useCallback(async () => {
     if (!automated || manualOnly || tests.length === 0) return
     setRunning(true)
+    setCapturedConsoleLines([])
     setSubmitError(null)
     setSubmitSuccess(false)
     setHiddenSummary(null)
     try {
-      const r = await runChallengeTests(code, tests)
-      setDisplayResults(r)
+      const { results, consoleLines } = await runChallengeTests(code, tests)
+      setDisplayResults(results)
+      setCapturedConsoleLines(consoleLines)
       setTestRunPhase('visible_only')
-      const ok = allTestsPassed(r)
+      const ok = allTestsPassed(results)
       setAllVisiblePass(ok)
       setRunCodeBanner(ok ? 'success' : 'fail')
     } finally {
@@ -553,22 +566,24 @@ function CodingOrDebuggingView({
       return
     }
     setRunning(true)
+    setCapturedConsoleLines([])
     setHiddenSummary(null)
     try {
       const all = [...tests, ...hidden]
-      const r = await runChallengeTests(code, all)
-      setDisplayResults(r)
+      const { results, consoleLines } = await runChallengeTests(code, all)
+      setDisplayResults(results)
+      setCapturedConsoleLines(consoleLines)
       setTestRunPhase('full_submit')
-      const vis = r.slice(0, tests.length)
+      const vis = results.slice(0, tests.length)
       setAllVisiblePass(allTestsPassed(vis))
       if (hidden.length > 0) {
-        const hid = r.slice(tests.length)
+        const hid = results.slice(tests.length)
         const hp = hid.filter((x) => x.passed).length
         setHiddenSummary(`Hidden checks: ${hp}/${hid.length} passed.`)
       } else {
         setHiddenSummary(null)
       }
-      if (!allTestsPassed(r)) {
+      if (!allTestsPassed(results)) {
         setSubmitError(
           'Run Code and pass all tests before submitting.',
         )
@@ -893,14 +908,69 @@ function CodingOrDebuggingView({
 
           {/* Console (desktop row height from gridTemplateRows) */}
           <div className={styles.wsConsole}>
-            <div className={styles.wsConsoleHead}>Test output</div>
-            <div className={styles.wsConsoleBody}>
-              <TestResultsPanel
-                results={displayResults}
-                loading={running}
-                hiddenSummary={hiddenSummary}
-                variant="console"
-              />
+            <div
+              className={styles.wsConsoleHead}
+              role="tablist"
+              aria-label="Output panels"
+            >
+              <button
+                type="button"
+                id="workspace-tab-tests"
+                className={
+                  workspaceOutputTab === 'tests'
+                    ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
+                    : styles.wsConsoleTab
+                }
+                role="tab"
+                aria-selected={workspaceOutputTab === 'tests'}
+                aria-controls="workspace-panel-tests"
+                onClick={() => setWorkspaceOutputTab('tests')}
+              >
+                Test output
+              </button>
+              <button
+                type="button"
+                id="workspace-tab-console"
+                className={
+                  workspaceOutputTab === 'console'
+                    ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
+                    : styles.wsConsoleTab
+                }
+                role="tab"
+                aria-selected={workspaceOutputTab === 'console'}
+                aria-controls="workspace-panel-console"
+                onClick={() => setWorkspaceOutputTab('console')}
+              >
+                Console
+              </button>
+            </div>
+            <div
+              className={styles.wsConsoleBody}
+              id={
+                workspaceOutputTab === 'tests'
+                  ? 'workspace-panel-tests'
+                  : 'workspace-panel-console'
+              }
+              role="tabpanel"
+              aria-labelledby={
+                workspaceOutputTab === 'tests'
+                  ? 'workspace-tab-tests'
+                  : 'workspace-tab-console'
+              }
+            >
+              {workspaceOutputTab === 'tests' ? (
+                <TestResultsPanel
+                  results={displayResults}
+                  loading={running}
+                  hiddenSummary={hiddenSummary}
+                  variant="console"
+                />
+              ) : (
+                <CapturedConsolePanel
+                  lines={capturedConsoleLines}
+                  loading={running}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -1298,7 +1368,7 @@ function ChallengeDetailInner({ challenge }: { challenge: Challenge }) {
     isDebuggingChallenge(challenge) ||
     isReactChallenge(challenge)
   ) {
-    return <CodingOrDebuggingView challenge={challenge} />
+    return <CodingOrDebuggingView key={challenge.id} challenge={challenge} />
   }
 
   if (isQuizChallenge(challenge)) {

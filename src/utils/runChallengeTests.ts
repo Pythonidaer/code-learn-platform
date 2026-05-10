@@ -41,46 +41,114 @@ function matchesExpected(actual: unknown, expected: unknown): boolean {
   return deepEqual(actual, expected)
 }
 
+function formatConsoleArgs(args: unknown[]): string {
+  return args
+    .map((a) => {
+      if (typeof a === 'string') return a
+      if (a instanceof Error) return `${a.name}: ${a.message}`
+      try {
+        return JSON.stringify(a)
+      } catch {
+        return String(a)
+      }
+    })
+    .join(' ')
+}
+
+export type ConsoleCaptureLevel = 'log' | 'info' | 'warn' | 'error' | 'debug'
+
+export interface CapturedConsoleLine {
+  level: ConsoleCaptureLevel
+  text: string
+}
+
+export interface RunChallengeTestsOutput {
+  results: ChallengeTestResult[]
+  consoleLines: CapturedConsoleLine[]
+}
+
+const CONSOLE_TAP_METHODS: readonly ConsoleCaptureLevel[] = [
+  'log',
+  'info',
+  'warn',
+  'error',
+  'debug',
+]
+
+function installConsoleTap(
+  onLine: (level: ConsoleCaptureLevel, args: unknown[]) => void,
+): () => void {
+  const originals: Partial<Record<ConsoleCaptureLevel, (...a: unknown[]) => void>> =
+    {}
+  for (const method of CONSOLE_TAP_METHODS) {
+    const orig = console[method].bind(console) as (...a: unknown[]) => void
+    originals[method] = orig
+    ;(console as unknown as Record<string, (...a: unknown[]) => void>)[method] =
+      (...args: unknown[]) => {
+        orig(...args)
+        onLine(method, args)
+      }
+  }
+  return () => {
+    for (const method of CONSOLE_TAP_METHODS) {
+      const orig = originals[method]
+      if (orig) {
+        ;(console as unknown as Record<string, typeof orig>)[method] = orig
+      }
+    }
+  }
+}
+
 /**
  * Runs user JavaScript followed by each test `code` block as an IIFE body.
  * Test code should use `return` for the value to compare to `expected`.
  * Async results (Promises) are awaited once.
+ *
+ * `console.log` / `info` / `warn` / `error` / `debug` from user or test code
+ * are forwarded to the real console and mirrored in `consoleLines`.
  *
  * Not a secure sandbox—local learning only; replace with a backend runner for production.
  */
 export async function runChallengeTests(
   userCode: string,
   testCases: CodingTestCase[],
-): Promise<ChallengeTestResult[]> {
+): Promise<RunChallengeTestsOutput> {
+  const consoleLines: CapturedConsoleLine[] = []
+  const restoreConsole = installConsoleTap((level, args) => {
+    consoleLines.push({ level, text: formatConsoleArgs(args) })
+  })
+
   const results: ChallengeTestResult[] = []
+  try {
+    for (const tc of testCases) {
+      try {
+        const wrapped = `${userCode}\n\n;return (async function() {\n${tc.code}\n})();`
+        const fn = new Function(wrapped)
+        const actual = await Promise.resolve(fn())
 
-  for (const tc of testCases) {
-    try {
-      const wrapped = `${userCode}\n\n;return (async function() {\n${tc.code}\n})();`
-      const fn = new Function(wrapped)
-      const actual = await Promise.resolve(fn())
-
-      const passed = matchesExpected(actual, tc.expected)
-      results.push({
-        name: tc.name,
-        passed,
-        expected: tc.expected,
-        actual,
-        explanation: tc.explanation,
-      })
-    } catch (e) {
-      results.push({
-        name: tc.name,
-        passed: false,
-        expected: tc.expected,
-        actual: undefined,
-        error: e instanceof Error ? e.message : String(e),
-        explanation: tc.explanation,
-      })
+        const passed = matchesExpected(actual, tc.expected)
+        results.push({
+          name: tc.name,
+          passed,
+          expected: tc.expected,
+          actual,
+          explanation: tc.explanation,
+        })
+      } catch (e) {
+        results.push({
+          name: tc.name,
+          passed: false,
+          expected: tc.expected,
+          actual: undefined,
+          error: e instanceof Error ? e.message : String(e),
+          explanation: tc.explanation,
+        })
+      }
     }
+    return { results, consoleLines }
+  } finally {
+    restoreConsole()
   }
-
-  return results
 }
 
 export function allTestsPassed(results: ChallengeTestResult[]): boolean {

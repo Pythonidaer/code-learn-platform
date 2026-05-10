@@ -40,7 +40,7 @@ export function MonacoCodeEditor({
       target: monaco.languages.typescript.ScriptTarget.ES2022,
       module: monaco.languages.typescript.ModuleKind.ESNext,
       noEmit: true,
-      lib: ['es2022'],
+      lib: ['es2022', 'dom'],
     }
     monaco.languages.typescript.javascriptDefaults.setCompilerOptions(compilerOpts)
     monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({

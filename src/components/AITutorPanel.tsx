@@ -293,10 +293,12 @@ export function AITutorPanel({
     voiceRec.stop()
     speech.stop()
     clearAiTutorCache(challenge.id)
-    setMessages([])
-    setInput('')
-    setError(null)
-    setLoading(false)
+    startTransition(() => {
+      setMessages([])
+      setInput('')
+      setError(null)
+      setLoading(false)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset when navigating to this challenge id
   }, [challenge.id])
 

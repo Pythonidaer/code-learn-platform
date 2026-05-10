@@ -983,13 +983,43 @@ details.tutorDetails > summary {
 
 .wsConsoleHead {
   flex-shrink: 0;
-  padding: 0.3rem 0.65rem;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border-bottom: 1px solid #222;
+}
+
+.wsConsoleTab {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.4rem 0.85rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #6e7681;
-  border-bottom: 1px solid #222;
+}
+
+.wsConsoleTab:hover {
+  color: #8b949e;
+}
+
+.wsConsoleTab:focus-visible {
+  outline: 2px solid #f85149;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.wsConsoleTabActive {
+  color: #c9d1d9;
+  border-bottom-color: #f85149;
 }
 
 .wsConsoleBody {

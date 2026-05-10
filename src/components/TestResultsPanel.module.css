@@ -141,3 +141,42 @@
   font-size: 0.78rem;
   color: #d29922;
 }
+
+.consoleLineList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.consoleLine {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.consoleLine[data-level='log'],
+.consoleLine[data-level='debug'],
+.consoleLine[data-level='info'] {
+  color: #c9d1d9;
+}
+
+.consoleLine[data-level='warn'] {
+  color: #d29922;
+}
+
+.consoleLine[data-level='error'] {
+  color: #ff7b72;
+}
+
+.inlineCodeHint {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  font-size: 0.88em;
+  background: #21262d;
+  padding: 0.05em 0.28em;
+  border-radius: 3px;
+  color: #79c0ff;
+}

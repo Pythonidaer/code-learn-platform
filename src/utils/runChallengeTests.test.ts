@@ -26,7 +26,7 @@ describe('deepEqual', () => {
 describe('runChallengeTests', () => {
   it('passes when user code satisfies visible tests', async () => {
     const user = `function add(a,b){ return a+b; }`
-    const results = await runChallengeTests(user, [
+    const { results } = await runChallengeTests(user, [
       {
         name: 'sums',
         code: 'return add(2,3);',
@@ -40,7 +40,7 @@ describe('runChallengeTests', () => {
 
   it('fails when actual does not match expected', async () => {
     const user = `function add(a,b){ return a+b; }`
-    const results = await runChallengeTests(user, [
+    const { results } = await runChallengeTests(user, [
       {
         name: 'wrong expectation',
         code: 'return add(1,1);',
@@ -54,7 +54,7 @@ describe('runChallengeTests', () => {
 
   it('records runtime errors', async () => {
     const user = `function boom(){ throw new Error('nope'); }`
-    const results = await runChallengeTests(user, [
+    const { results } = await runChallengeTests(user, [
       {
         name: 'throws',
         code: 'return boom();',
@@ -67,7 +67,7 @@ describe('runChallengeTests', () => {
 
   it('awaits async test bodies', async () => {
     const user = `async function later(){ return 7; }`
-    const results = await runChallengeTests(user, [
+    const { results } = await runChallengeTests(user, [
       {
         name: 'async return',
         code: 'return await later();',
@@ -75,6 +75,16 @@ describe('runChallengeTests', () => {
       },
     ])
     expect(results[0].passed).toBe(true)
+  })
+
+  it('captures console output from user code while tests run', async () => {
+    const user = `function shout() { console.warn('watch', 1); return 99; }`
+    const { results, consoleLines } = await runChallengeTests(user, [
+      { name: 't', code: 'return shout();', expected: 99 },
+    ])
+    expect(results[0].passed).toBe(true)
+    expect(consoleLines.map((c) => c.text).join(' | ')).toMatch(/watch/)
+    expect(consoleLines.some((c) => c.level === 'warn')).toBe(true)
   })
 })
 
@@ -84,7 +94,7 @@ describe('summarizeTestResults / allTestsPassed', () => {
   })
 
   it('summarizeTestResults includes pass count and failures', async () => {
-    const r = await runChallengeTests('const x = 1;', [
+    const { results: r } = await runChallengeTests('const x = 1;', [
       { name: 'a', code: 'return x;', expected: 1 },
       { name: 'b', code: 'return x+1;', expected: 1 },
     ])
