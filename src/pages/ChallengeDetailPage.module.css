@@ -379,7 +379,7 @@ details.tutorDetails > summary {
 .codingWorkspaceDesktop .wsCenterMain {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(120px, 1fr) 48px 6px 200px;
+  grid-template-rows: minmax(120px, 1fr) minmax(72px, auto) 6px 200px;
   align-items: stretch;
 }
 
@@ -532,11 +532,12 @@ details.tutorDetails > summary {
   overflow: hidden;
 }
 
-/* Fixed band above Test output (Clear / Run / Submit). Sync height with CENTER_EDITOR_ACTIONS_BAR_PX. */
+/* Fixed band above Test output. Sync height with CENTER_EDITOR_ACTIONS_BAR_PX. */
 .wsEditorActionsBar {
   flex: 0 0 auto;
   box-sizing: border-box;
-  height: 48px;
+  min-height: 72px;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -547,9 +548,10 @@ details.tutorDetails > summary {
 }
 
 .codingWorkspaceDesktop .wsEditorActionsBar {
-  height: 100%;
-  max-height: 48px;
-  min-height: 0;
+  align-self: stretch;
+  height: auto;
+  max-height: none;
+  min-height: 72px;
 }
 
 .wsEditorActionsGroup {
@@ -770,6 +772,62 @@ details.tutorDetails > summary {
 .wsBtnRun:focus-visible {
   outline: 2px solid #58a6ff;
   outline-offset: 2px;
+}
+
+.wsBtnStepThrough {
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  background: #1a1508;
+  border: 1px solid #9e6a03;
+  color: #e3b341;
+  border-radius: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.wsBtnStepThrough:hover:not(:disabled) {
+  border-color: #d29922;
+  color: #f0d04a;
+}
+
+.wsBtnStepThrough:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wsBtnStepThrough:focus-visible {
+  outline: 2px solid #d29922;
+  outline-offset: 2px;
+}
+
+.wsTraceCaseLabel {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  align-items: flex-start;
+  max-width: min(14rem, 100%);
+}
+
+.wsTraceCaseHeading {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b949e;
+}
+
+.wsTraceSelect {
+  font: inherit;
+  font-size: 0.62rem;
+  background: #0d1117;
+  color: #e6edf3;
+  border: 1px solid #3a3a3a;
+  border-radius: 2px;
+  padding: 0.2rem 0.35rem;
+  min-width: 6.5rem;
+  max-width: 100%;
 }
 
 .wsBtnSubmit {

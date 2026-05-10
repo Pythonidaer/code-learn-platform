@@ -23,10 +23,13 @@ import {
   isReactChallenge,
   challengeHasAutomatedTests,
 } from '../types/challenge'
+import { TracePanel } from '../components/TracePanel'
+import { traceChallengeCode } from '../utils/createCodeTrace'
 import { MarkdownMessage } from '../components/MarkdownMessage'
 import markdownStyles from '../components/MarkdownMessage.module.css'
 import { ENABLE_AI_TUTOR } from '../config/features'
 import type { TestRunPhase } from '../types/ai'
+import type { TraceStep } from '../types/trace'
 import { useProgress } from '../hooks/useProgress'
 import { AITutorPanel } from '../components/AITutorPanel'
 import { MonacoCodeEditor } from '../components/MonacoCodeEditor'
@@ -427,7 +430,7 @@ function CodingOrDebuggingView({
     CapturedConsoleLine[]
   >([])
   const [workspaceOutputTab, setWorkspaceOutputTab] = useState<
-    'tests' | 'console'
+    'tests' | 'trace' | 'console'
   >('tests')
   const [running, setRunning] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -441,6 +444,26 @@ function CodingOrDebuggingView({
   )
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
+  const [traceSteps, setTraceSteps] = useState<TraceStep[] | null>(null)
+  const [tracePlayhead, setTracePlayhead] = useState(0)
+  const [traceRunning, setTraceRunning] = useState(false)
+  const [traceOutcomeMessage, setTraceOutcomeMessage] = useState<string | null>(
+    null,
+  )
+  const [traceFinalReturn, setTraceFinalReturn] = useState<unknown>(undefined)
+  const [traceTestMatched, setTraceTestMatched] = useState<boolean | undefined>(
+    undefined,
+  )
+  const [traceCaseIndex, setTraceCaseIndex] = useState(0)
+
+  const traceCaseIdx =
+    tests.length > 0 ? Math.min(traceCaseIndex, tests.length - 1) : 0
+
+  const tracePlayheadIdx =
+    traceSteps?.length && traceSteps.length > 0
+      ? Math.min(tracePlayhead, traceSteps.length - 1)
+      : 0
+
   const [consoleHeight, setConsoleHeight] = useState(() => loadConsoleHeight())
   const [centerMaxConsole, setCenterMaxConsole] = useState(480)
 
@@ -448,6 +471,14 @@ function CodingOrDebuggingView({
   const workspace = useChallengeWorkspaceChromeState(tutorEnabled)
 
   const centerMainRef = useRef<HTMLDivElement | null>(null)
+
+  const clearTraceState = useCallback(() => {
+    setTraceSteps(null)
+    setTracePlayhead(0)
+    setTraceOutcomeMessage(null)
+    setTraceFinalReturn(undefined)
+    setTraceTestMatched(undefined)
+  }, [])
 
   useEffect(() => {
     saveConsoleHeight(consoleHeight)
@@ -507,12 +538,13 @@ function CodingOrDebuggingView({
   const onCodeChange = useCallback(
     (next: string) => {
       setCode(next)
+      clearTraceState()
       setSubmitAllPass(false)
       setSubmitError(null)
       setRunCodeBanner(null)
       setSubmitSuccess(false)
     },
-    [],
+    [clearTraceState],
   )
 
   useEffect(() => {
@@ -545,6 +577,41 @@ function CodingOrDebuggingView({
       setRunning(false)
     }
   }, [automated, manualOnly, tests, code])
+
+  const handleStepThrough = useCallback(async () => {
+    if (!automated || manualOnly || tests.length === 0) return
+    const tc = tests[traceCaseIdx]
+    if (!tc) return
+
+    setTraceRunning(true)
+    setTraceOutcomeMessage(null)
+
+    try {
+      const result = await traceChallengeCode({
+        userCode: code,
+        testCase: tc,
+      })
+
+      setWorkspaceOutputTab('trace')
+
+      if (!result.ok) {
+        setTraceOutcomeMessage(result.message)
+        setTraceSteps(result.steps ?? [])
+        setTraceFinalReturn(undefined)
+        setTraceTestMatched(undefined)
+        setTracePlayhead(0)
+        return
+      }
+
+      setTraceOutcomeMessage(null)
+      setTraceSteps(result.steps)
+      setTraceFinalReturn(result.testReturnValue)
+      setTraceTestMatched(result.testPassed)
+      setTracePlayhead(0)
+    } finally {
+      setTraceRunning(false)
+    }
+  }, [automated, manualOnly, tests, traceCaseIdx, code])
 
   const handleSubmit = useCallback(async () => {
     setSubmitError(null)
@@ -623,6 +690,7 @@ function CodingOrDebuggingView({
     setSubmitAllPass(false)
     setRunCodeBanner(null)
     setSubmitSuccess(false)
+    clearTraceState()
   }
 
   const clearCompletion = () => {
@@ -638,6 +706,15 @@ function CodingOrDebuggingView({
   }
 
   const done = isComplete(challenge.id)
+
+  const traceHighlightedLine = useMemo(() => {
+    if (!traceSteps?.length) return null
+    const step = traceSteps[tracePlayheadIdx]
+
+    return typeof step?.lineNumber === 'number' && step.lineNumber > 0
+      ? step.lineNumber
+      : null
+  }, [traceSteps, tracePlayheadIdx])
 
   const statusLabel = done
     ? 'Completed'
@@ -763,7 +840,7 @@ function CodingOrDebuggingView({
 
   const centerMainGridStyle = workspace.layoutDesktop
     ? {
-        gridTemplateRows: `minmax(120px, 1fr) ${CENTER_EDITOR_ACTIONS_BAR_PX}px 6px ${consoleHeight}px`,
+        gridTemplateRows: `minmax(120px, 1fr) minmax(${CENTER_EDITOR_ACTIONS_BAR_PX}px, auto) 6px ${consoleHeight}px`,
       }
     : undefined
 
@@ -803,6 +880,7 @@ function CodingOrDebuggingView({
                 onChange={onCodeChange}
                 language={editorLanguage()}
                 flexHeight
+                highlightedTraceLine={traceHighlightedLine}
               />
             </div>
 
@@ -875,17 +953,66 @@ function CodingOrDebuggingView({
                 type="button"
                 className={styles.wsBtnRun}
                 disabled={
-                  running || !automated || manualOnly || tests.length === 0
+                  running ||
+                  traceRunning ||
+                  !automated ||
+                  manualOnly ||
+                  tests.length === 0
                 }
                 onClick={() => void handleRunTests()}
                 data-testid="run-tests"
               >
                 Run Code
               </button>
+              {tests.length > 0 ? (
+                <label className={styles.wsTraceCaseLabel}>
+                  <span className={styles.wsTraceCaseHeading}>Trace case</span>
+                  <select
+                    className={styles.wsTraceSelect}
+                    aria-label="Trace test case"
+                    value={traceCaseIdx}
+                    disabled={
+                      traceRunning ||
+                      running ||
+                      !automated ||
+                      manualOnly ||
+                      tests.length === 0
+                    }
+                    onChange={(e) =>
+                      setTraceCaseIndex(Number(e.target.value))
+                    }
+                  >
+                    {tests.map((t, idx) => (
+                      <option key={t.name} value={idx}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <button
+                type="button"
+                className={styles.wsBtnStepThrough}
+                disabled={
+                  running ||
+                  traceRunning ||
+                  !automated ||
+                  manualOnly ||
+                  tests.length === 0
+                }
+                onClick={() => void handleStepThrough()}
+                data-testid="step-through"
+              >
+                Step Through
+              </button>
               <button
                 type="button"
                 className={styles.wsBtnSubmit}
-                disabled={running || (!manualOnly && !automated)}
+                disabled={
+                  running ||
+                  traceRunning ||
+                  (!manualOnly && !automated)
+                }
                 onClick={() => void handleSubmit()}
                 data-testid="submit-challenge"
               >
@@ -930,6 +1057,21 @@ function CodingOrDebuggingView({
               </button>
               <button
                 type="button"
+                id="workspace-tab-trace"
+                className={
+                  workspaceOutputTab === 'trace'
+                    ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
+                    : styles.wsConsoleTab
+                }
+                role="tab"
+                aria-selected={workspaceOutputTab === 'trace'}
+                aria-controls="workspace-panel-trace"
+                onClick={() => setWorkspaceOutputTab('trace')}
+              >
+                Step trace
+              </button>
+              <button
+                type="button"
                 id="workspace-tab-console"
                 className={
                   workspaceOutputTab === 'console'
@@ -949,13 +1091,17 @@ function CodingOrDebuggingView({
               id={
                 workspaceOutputTab === 'tests'
                   ? 'workspace-panel-tests'
-                  : 'workspace-panel-console'
+                  : workspaceOutputTab === 'trace'
+                    ? 'workspace-panel-trace'
+                    : 'workspace-panel-console'
               }
               role="tabpanel"
               aria-labelledby={
                 workspaceOutputTab === 'tests'
                   ? 'workspace-tab-tests'
-                  : 'workspace-tab-console'
+                  : workspaceOutputTab === 'trace'
+                    ? 'workspace-tab-trace'
+                    : 'workspace-tab-console'
               }
             >
               {workspaceOutputTab === 'tests' ? (
@@ -965,6 +1111,22 @@ function CodingOrDebuggingView({
                   hiddenSummary={hiddenSummary}
                   variant="console"
                 />
+              ) : workspaceOutputTab === 'trace' ? (
+                <div
+                  className={`${testRowStyles.console} ${testRowStyles.consoleTerminal}`}
+                >
+                  <TracePanel
+                    steps={traceSteps}
+                    currentIndex={tracePlayheadIdx}
+                    onIndexChange={setTracePlayhead}
+                    onResetIndex={() => setTracePlayhead(0)}
+                    testCaseName={tests[traceCaseIdx]?.name}
+                    unsupportedOrFatal={traceOutcomeMessage}
+                    loading={traceRunning}
+                    finalReturnValue={traceFinalReturn}
+                    testPassed={traceTestMatched}
+                  />
+                </div>
               ) : (
                 <CapturedConsolePanel
                   lines={capturedConsoleLines}
@@ -1134,7 +1296,7 @@ function QuizWorkspaceView({ challenge }: { challenge: QuizChallenge }) {
 
   const quizCenterMainGridStyle = workspace.layoutDesktop
     ? {
-        gridTemplateRows: `minmax(120px, 1fr) ${CENTER_EDITOR_ACTIONS_BAR_PX}px 6px ${consoleHeight}px`,
+        gridTemplateRows: `minmax(120px, 1fr) minmax(${CENTER_EDITOR_ACTIONS_BAR_PX}px, auto) 6px ${consoleHeight}px`,
       }
     : undefined
 

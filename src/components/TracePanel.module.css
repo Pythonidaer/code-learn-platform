@@ -1,0 +1,152 @@
+.wrap {
+  padding: 0.35rem 0.35rem 0.75rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #222;
+}
+
+.testName {
+  color: #8b949e;
+  font-size: 0.68rem;
+}
+
+.testName strong {
+  color: #e6edf3;
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.btn {
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.45rem;
+  background: #141414;
+  border: 1px solid #3a3a3a;
+  color: #e6edf3;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: #8b949e;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.metrics {
+  color: #8b949e;
+  font-size: 0.65rem;
+}
+
+.warn {
+  color: #f85149;
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(248, 81, 73, 0.45);
+  background: rgba(248, 81, 73, 0.08);
+  border-radius: 2px;
+}
+
+.summary {
+  color: #3fb950;
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  background: rgba(63, 185, 80, 0.06);
+  border-radius: 2px;
+}
+
+.summaryFail {
+  color: #d29922;
+  border-color: rgba(210, 153, 34, 0.45);
+  background: rgba(210, 153, 34, 0.08);
+}
+
+.idle {
+  color: #d29922;
+  margin: 0;
+  padding: 0.35rem 0;
+  font-size: 0.78rem;
+}
+
+.block {
+  border: 1px solid #2a2a2a;
+  border-radius: 2px;
+  padding: 0.45rem 0.5rem;
+  margin-bottom: 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.meta {
+  font-size: 0.62rem;
+  color: #8b949e;
+  margin-bottom: 0.25rem;
+}
+
+.desc {
+  color: #e6edf3;
+  margin: 0 0 0.35rem;
+}
+
+.varTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.62rem;
+  margin: 0;
+}
+
+.varTable th,
+.varTable td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.2rem 0.35rem 0.2rem 0;
+  border-bottom: 1px solid #222;
+}
+
+.varName {
+  color: #79c0ff;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.varVal {
+  color: #c9d1d9;
+  word-break: break-word;
+}
+
+.note {
+  font-size: 0.6rem;
+  color: #6e7681;
+  margin: 0.75rem 0 0;
+  padding-top: 0.35rem;
+  border-top: 1px dashed #30363d;
+  line-height: 1.4;
+}
+
+.errLine {
+  color: #f85149;
+  margin: 0.35rem 0 0;
+}

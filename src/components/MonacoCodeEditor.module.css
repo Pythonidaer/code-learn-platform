@@ -20,3 +20,7 @@
 .wrap :global(.monaco-editor) {
   background-color: #050508 !important;
 }
+
+.wrap :global(.clpTraceCurrentLine) {
+  background-color: rgba(210, 153, 34, 0.16);
+}
