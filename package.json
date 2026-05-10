@@ -17,6 +17,7 @@
   "dependencies": {
     "@babel/generator": "^7.29.1",
     "@babel/parser": "^7.29.3",
+    "@babel/standalone": "^7.29.4",
     "@babel/traverse": "^7.29.0",
     "@babel/types": "^7.29.0",
     "@monaco-editor/react": "^4.7.0",
@@ -34,6 +35,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/babel__generator": "^7.27.0",
+    "@types/babel__standalone": "^7.1.9",
     "@types/babel__traverse": "^7.28.0",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",

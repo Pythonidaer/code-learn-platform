@@ -1,20 +1,55 @@
 import { parse } from '@babel/parser'
-import generate from '@babel/generator'
-import traverse from '@babel/traverse'
+import generateModule from '@babel/generator'
+import traverseModule from '@babel/traverse'
 import * as t from '@babel/types'
 import type { NodePath, Scope } from '@babel/traverse'
 import type { CodingTestCase } from '../types/challenge'
 import type { TraceRunResult, TraceStep, TraceEventType } from '../types/trace'
+import { buildFullSnapshot, filterTraceVariables } from './traceDisplay'
 import { deepEqual } from './runChallengeTests'
 
 const TRACE_UNSUPPORTED =
   'Step tracing is not available for this solution yet. Try Run Code instead.'
 
+type Traverse = typeof traverseModule
+type Generator = typeof generateModule
+
+/** Bundlers often wrap `@babel/*` CJS defaults as `{ default: fn }` — unwrap for runtime */
+function babelDefaultCallable<T extends (...args: never[]) => unknown>(
+  mod: unknown,
+): T {
+  let cur: unknown = mod
+  for (let i = 0; i < 5; i++) {
+    if (typeof cur === 'function') return cur as T
+    if (
+      cur !== null &&
+      typeof cur === 'object' &&
+      'default' in (cur as object)
+    ) {
+      cur = (cur as { default: unknown }).default
+      continue
+    }
+    break
+  }
+  throw new TypeError('Expected Babel module default callable')
+}
+
+const traverse = babelDefaultCallable<Traverse>(traverseModule)
+const generate = babelDefaultCallable<Generator>(generateModule)
+
 function randomSuffix(): string {
-  const s =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID().replace(/-/g, '').slice(0, 12)
-      : Math.random().toString(36).slice(2, 14)
+  try {
+    if (
+      typeof crypto !== 'undefined' &&
+      typeof crypto.randomUUID === 'function'
+    ) {
+      const s = crypto.randomUUID().replace(/-/g, '').slice(0, 12)
+      return /^[a-z]/i.test(s) ? s : `_${s}`
+    }
+  } catch {
+    /* Non-secure contexts or older runtimes */
+  }
+  const s = Math.random().toString(36).slice(2, 14)
   return /^[a-z]/i.test(s) ? s : `_${s}`
 }
 
@@ -145,30 +180,44 @@ globalThis[${JSON.stringify(stepsGlobalKey)}] = function () {
   }
 }
 
-function tryParse(code: string, jsx: boolean) {
-  const plugins = [
-    'optionalChaining',
-    'nullishCoalescingOperator',
-    'classProperties',
-    'topLevelAwait',
-    'numericSeparator',
-  ] as const
+/** Parser plugins shared by all parse attempts. */
+const PARSER_PLUGINS = [
+  'optionalChaining',
+  'nullishCoalescingOperator',
+  'logicalAssignment',
+  'classProperties',
+  'topLevelAwait',
+  'numericSeparator',
+] as const
+
+function parseWithOptions(
+  code: string,
+  jsx: boolean,
+  sourceType: 'script' | 'module' | 'unambiguous',
+): ReturnType<typeof parse> | null {
   try {
     return parse(code, {
-      sourceType: 'unambiguous',
+      sourceType,
       allowAwaitOutsideFunction: true,
       allowReturnOutsideFunction: true,
       errorRecovery: false,
-      plugins: [...plugins, ...(jsx ? (['jsx'] as const) : [])],
+      plugins: [...PARSER_PLUGINS, ...(jsx ? (['jsx'] as const) : [])],
     })
   } catch {
     return null
   }
 }
 
-/** Try plain JavaScript parse first (avoids JSX mis-parse), then JSX. */
+/** Try plain JS then JSX; prefer script for challenge-style `function ...` blocks. */
 export function parseUserSource(code: string): ReturnType<typeof parse> | null {
-  return tryParse(code, false) ?? tryParse(code, true)
+  const sourceTypes = ['script', 'module', 'unambiguous'] as const
+  for (const jsx of [false, true] as const) {
+    for (const st of sourceTypes) {
+      const ast = parseWithOptions(code, jsx, st)
+      if (ast) return ast
+    }
+  }
+  return null
 }
 
 function collectBindingSnapshotNames(scopePath: NodePath<t.Node>): string[] {
@@ -177,6 +226,7 @@ function collectBindingSnapshotNames(scopePath: NodePath<t.Node>): string[] {
   while (s) {
     for (const k of Object.keys(s.bindings)) {
       if (k.startsWith('__clp')) continue
+      if (k.startsWith('__trace')) continue
       if (k === 'arguments') continue
       names.add(k)
     }
@@ -200,17 +250,98 @@ function statementEventType(stmt: NodePath<t.Statement>): TraceEventType {
   return 'line'
 }
 
+function describeCallMemberName(
+  callee: NodePath<t.Node>,
+): string | null {
+  if (!callee.isExpression()) return null
+  const ex = callee as NodePath<t.Expression>
+  if (ex.isMemberExpression()) {
+    const p = ex.get('property')
+    if (p.isIdentifier()) return p.node.name
+    if (p.isStringLiteral()) return p.node.value
+  }
+  return null
+}
+
+function describeExpressionStatement(
+  stmt: NodePath<t.ExpressionStatement>,
+): string {
+  const e = stmt.get('expression')
+  if (e.isCallExpression()) {
+    const calleeHead = e.get('callee')
+    const member = describeCallMemberName(calleeHead)
+    if (member === 'set')
+      return 'Stored a value in the map under a key.'
+    if (member === 'has')
+      return 'Checked whether the map contains a key.'
+    if (member === 'get')
+      return 'Read a value from the map.'
+    if (member === 'push')
+      return 'Pushed a value onto an array.'
+    if (member === 'pop')
+      return 'Popped from an array or stack.'
+    if (t.isIdentifier(calleeHead.node) && calleeHead.node.name === 'console.log')
+      return 'Logged a value to the console.'
+    return 'Called a function.'
+  }
+  if (e.isAssignmentExpression()) return 'Updated a variable with a new value.'
+  if (e.isUpdateExpression()) return 'Updated a counter or index.'
+  return 'Evaluated an expression on this line.'
+}
+
 function statementDesc(stmt: NodePath<t.Statement>): string {
-  if (stmt.isVariableDeclaration()) return 'Variable declaration executed'
-  if (stmt.isIfStatement()) return 'If executed'
-  if (stmt.isForStatement()) return 'For loop / iteration boundary'
-  if (stmt.isForOfStatement()) return 'For-of loop boundary'
-  if (stmt.isForInStatement()) return 'For-in loop boundary'
-  if (stmt.isWhileStatement()) return 'While loop boundary'
-  if (stmt.isDoWhileStatement()) return 'Do-while loop boundary'
+  if (stmt.isVariableDeclaration()) {
+    const names: string[] = []
+    for (const d of stmt.node.declarations) {
+      if (t.isIdentifier(d.id)) names.push(d.id.name)
+    }
+    if (
+      names.length > 0 &&
+      names.every(
+        (n) =>
+          n.startsWith('__clp') ||
+          n.startsWith('__trace') ||
+          /^__clpRv_/i.test(n),
+      )
+    ) {
+      return 'Computed return value.'
+    }
+    const first = stmt.node.declarations[0]
+    const init = first?.init
+    if (names.length === 1 && init) {
+      if (t.isObjectExpression(init) && init.properties.length === 0)
+        return `Declared ${names[0]} as an empty object.`
+      if (
+        t.isNewExpression(init) &&
+        t.isIdentifier(init.callee) &&
+        init.callee.name === 'Map'
+      )
+        return `Created a new Map (${names[0]}).`
+      if (t.isArrayExpression(init) && init.elements.length === 0)
+        return `Declared ${names[0]} as an empty array.`
+      if (t.isIdentifier(init)) {
+        return `Declared ${names[0]} using ${init.name}.`
+      }
+      if (
+        t.isBinaryExpression(init) &&
+        (init.operator === '-' || init.operator === '+')
+      ) {
+        return `Computed ${names[0]} with arithmetic on this line.`
+      }
+    }
+    if (names.length > 0)
+      return `Declared ${names.join(', ')}.`
+    return 'Declared new variables.'
+  }
+  if (stmt.isIfStatement()) return 'Evaluated an if condition.'
+  if (stmt.isForStatement()) return 'Continued the for loop or ran its header.'
+  if (stmt.isForOfStatement()) return 'Continued the for…of loop.'
+  if (stmt.isForInStatement()) return 'Continued the for…in loop.'
+  if (stmt.isWhileStatement()) return 'Continued the while loop.'
+  if (stmt.isDoWhileStatement()) return 'Continued the do…while loop.'
   if (stmt.isExpressionStatement())
-    return 'Expression evaluated'
-  return 'Statement executed'
+    return describeExpressionStatement(stmt)
+  return 'Executed a statement.'
 }
 
 function snapshotArrow(names: string[]): t.ArrowFunctionExpression {
@@ -282,6 +413,18 @@ function insertTraceAfter(stmt: NodePath<t.Statement>, emitFnId: string) {
   )
 }
 
+function returnDescriptionFromArgument(
+  arg: t.Expression,
+): string {
+  if (t.isArrayExpression(arg))
+    return 'Returned a result array from the function.'
+  if (t.isObjectExpression(arg))
+    return 'Returned an object from the function.'
+  if (t.isLiteral(arg)) return 'Returned a literal value.'
+  if (t.isIdentifier(arg)) return `Returned ${arg.name}.`
+  return 'Returned a result from the function.'
+}
+
 let rvSeq = 0
 
 function wrapReturnStatement(path: NodePath<t.ReturnStatement>, emitFnId: string) {
@@ -302,7 +445,7 @@ function wrapReturnStatement(path: NodePath<t.ReturnStatement>, emitFnId: string
     emitFnId,
     line,
     eventType: 'return',
-    description: 'Returned from function',
+    description: returnDescriptionFromArgument(arg),
     snapshotNames: snapNames,
     optionalReturnExpr: t.identifier(rvName),
   })
@@ -368,6 +511,21 @@ function wrapReturns(ast: t.File, emitFnId: string) {
   }
 }
 
+function isInstrumentationTempDecl(stmtPath: NodePath<t.Statement>): boolean {
+  if (!stmtPath.isVariableDeclaration()) return false
+  const names: string[] = []
+  for (const d of stmtPath.node.declarations) {
+    if (t.isIdentifier(d.id)) names.push(d.id.name)
+  }
+  if (names.length === 0) return false
+  return names.every(
+    (n) =>
+      n.startsWith('__clp') ||
+      n.startsWith('__trace') ||
+      /^__clpRv_/i.test(n),
+  )
+}
+
 function isTraceEmitStmt(stmtPath: NodePath<t.Statement>, emitFnId: string): boolean {
   if (!stmtPath.isExpressionStatement()) return false
   const e = stmtPath.get('expression')
@@ -396,6 +554,7 @@ function insertBlockProbes(ast: t.File, emitFnId: string) {
       if (stmtPath.isFunctionDeclaration()) continue
       if (stmtPath.isClassDeclaration()) continue
       if (isTraceEmitStmt(stmtPath, emitFnId)) continue
+      if (isInstrumentationTempDecl(stmtPath)) continue
       insertTraceAfter(stmtPath, emitFnId)
     }
   }
@@ -464,13 +623,19 @@ export async function traceChallengeCode(params: {
   } catch (e) {
     const raw = readStepsFromGlobal(key)
     const errMsg = e instanceof Error ? e.message : String(e)
-    const steps: TraceStep[] = raw.map(normalizeScratchStep).filter(Boolean) as TraceStep[]
-    steps.push({
-      id: `err_${steps.length}`,
+    const normalized = raw
+      .map(normalizeScratchStep)
+      .filter(Boolean) as TraceStep[]
+    normalized.push({
+      id: `err_${normalized.length}`,
+      stepIndex: 0,
+      lineNumber: 0,
       eventType: 'error',
       description: 'Runtime error while stepping',
+      visibleValues: {},
       error: errMsg,
     })
+    const steps = finalizeTraceSteps(normalized)
     delete g[key]
     return {
       ok: false,
@@ -482,7 +647,9 @@ export async function traceChallengeCode(params: {
   const rawScratch = readStepsFromGlobal(key)
   delete g[key]
 
-  const steps = rawScratch.map(normalizeScratchStep).filter(Boolean) as TraceStep[]
+  const steps = finalizeTraceSteps(
+    rawScratch.map(normalizeScratchStep).filter(Boolean) as TraceStep[],
+  )
   const testPassed =
     testCase.expected === undefined ? undefined : deepEqual(testReturnValue, testCase.expected)
 
@@ -494,13 +661,19 @@ export async function traceChallengeCode(params: {
   }
 }
 
+function finalizeTraceSteps(steps: TraceStep[]): TraceStep[] {
+  return steps.map((s, i) => ({ ...s, stepIndex: i }))
+}
+
 function normalizeScratchStep(
   raw: TraceStep | Record<string, unknown>,
 ): TraceStep | null {
   const id =
     typeof raw.id === 'string' ? raw.id : String((raw as { id?: unknown }).id ?? '?')
-  const lineNumber =
+  const lineNumberRaw =
     typeof raw.lineNumber === 'number' ? raw.lineNumber : undefined
+  const lineNumber =
+    typeof lineNumberRaw === 'number' && lineNumberRaw > 0 ? lineNumberRaw : 0
   const eventType =
     typeof raw.eventType === 'string' &&
     [
@@ -517,9 +690,15 @@ function normalizeScratchStep(
   const description =
     typeof raw.description === 'string' ? raw.description : ''
 
-  let variables: Record<string, unknown> | undefined
+  let variablesRaw: Record<string, unknown> | undefined
   if (raw.variables && typeof raw.variables === 'object')
-    variables = raw.variables as Record<string, unknown>
+    variablesRaw = raw.variables as Record<string, unknown>
+
+  const fullSnapshot = buildFullSnapshot(variablesRaw)
+  const visibleValues =
+    fullSnapshot && Object.keys(fullSnapshot).length > 0
+      ? filterTraceVariables(fullSnapshot)
+      : {}
 
   let rv: unknown | undefined =
     'returnValue' in raw ? (raw.returnValue as unknown) : undefined
@@ -538,10 +717,12 @@ function normalizeScratchStep(
 
   return {
     id,
+    stepIndex: 0,
     lineNumber,
     eventType,
     description,
-    variables,
+    visibleValues,
+    fullSnapshot,
     returnValue: rv,
     error: err,
   }

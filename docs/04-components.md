@@ -51,23 +51,13 @@ Thin wrapper around `@monaco-editor/react`.
 |------|------|---------|-------------|
 | `value` | `string` | — | Controlled code value |
 | `onChange` | `(v: string) => void` | — | Called on every edit |
-| `language` | `'javascript' \| 'typescript'` | — | Syntax highlighting + type checking |
+| `language` | `MonacoWorkspaceLanguage` | — | Monaco grammar + TS/JS worker |
+| `modelPath` | `string` | — | Virtual file URI for the document model (e.g. `.jsx` for React so the TS worker parses JSX) |
 | `flexHeight` | `boolean` | `false` | Fill parent flex/grid cell (uses `height: 100%`) |
 
 When `flexHeight` is true a `ResizeObserver` calls `editor.layout()` whenever the wrapper div resizes, keeping Monaco responsive to the drag handle.
 
-**Monaco compiler options forwarded on mount:**
-```ts
-allowNonTsExtensions: true
-allowJs: true
-checkJs: true
-target: ES2022
-module: ESNext
-noEmit: true
-lib: ['es2022']   // ← missing 'dom' causes import squiggles
-```
-
-> **TODO:** The `lib: ['es2022']` setting strips browser globals (e.g. `clearTimeout`, `fetch`) causing red squiggles in valid JavaScript. Should be `lib: ['es2022', 'dom']`. React JSX also needs `jsx: 'react'` or `'preserve'` and the `react` types added. Root-cause and fix in next session.
+Challenge pages pass `language={monacoLanguageForChallenge(challenge)}`, `modelPath={monacoModelPathForChallenge(challenge)}`, and use **`javascript`** + **`.jsx` path** for React so syntax highlighting and JSX diagnostics both work. See [11-monaco-editor.md](./11-monaco-editor.md).
 
 ---
 
@@ -107,4 +97,3 @@ Renders an AI response string as Markdown via `react-markdown` + `remark-gfm`. U
 ## TODOs
 
 - **Storybook**: Add Storybook so each component can be developed and reviewed in isolation. Priority candidates: `ChallengeCard`, `TestResultsPanel`, `AITutorPanel` (embedded + standalone), `MonacoCodeEditor`.
-- **MonacoCodeEditor lib config**: Fix `lib` array to include `dom`; add React JSX support for react-type challenges.

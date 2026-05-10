@@ -2839,7 +2839,7 @@ export function StaleCounter() {
     difficulty: 'easy',
     hookConcepts: ['useState'],
     prompt:
-      'Two siblings need shared toggled state. Describe lifting state to the parent and passing callbacks/props down.',
+      'Two siblings need shared toggled state. Describe lifting state to the parent and passing callbacks/props down.\n\n**Toolbar** and **Preview** are spelled out below so the file runs; the important part is how **Parent** holds **useState** and passes **on** / **setOn** (or an equivalent callback) into both children.',
     componentCode: `import { useState } from 'react'
 
 function Parent() {
@@ -2850,13 +2850,54 @@ function Parent() {
       <Preview on={on} />
     </>
   )
-}`,
+}
+
+function Toolbar({ on, setOn }) {
+  return (
+    <button type="button" onClick={() => setOn((prev) => !prev)}>
+      Toggle
+    </button>
+  )
+}
+
+function Preview({ on }) {
+  return <p>{on ? 'ON' : 'OFF'}</p>
+}
+`,
     expectedRenderBehavior: 'Both children reflect the same boolean.',
     dataFlowExplanation:
       'State lives in **Parent**; children receive props and event handlers instead of owning duplicate state.',
     solutionCode: 'Move **useState** to the nearest common ancestor and pass **on** / **setOn** as props.',
     explanation:
       'Lift state to the lowest common parent to establish a single source of truth for siblings.',
+    functionName: 'Parent',
+    testCases: [
+      {
+        name: 'initial preview shows OFF',
+        explanation:
+          'With shared state defaulting to false, the preview should show OFF before any toggle.',
+        code: `const html = renderToString(React.createElement(Parent))
+return html.includes('OFF')`,
+        expected: true,
+      },
+      {
+        name: 'toolbar has a button',
+        explanation: 'The toolbar should render an interactive button.',
+        code: `const html = renderToString(React.createElement(Parent))
+return /<button[\\s>]/i.test(html)`,
+        expected: true,
+      },
+    ],
+    hiddenTestCases: [
+      {
+        name: 'toolbar before preview output',
+        code: `const html = renderToString(React.createElement(Parent))
+const iBtn = html.search(/<button/i)
+const iOff = html.indexOf('OFF')
+return iBtn >= 0 && iOff >= 0 && iBtn < iOff`,
+        expected: true,
+      },
+    ],
   },
   {
     id: 'react-usememo-list',
@@ -3244,11 +3285,13 @@ useEffect(() => {
     testCases: [
       {
         name: 'classic',
+        traceLabel: '[2,7,11,15], target=9',
         code: `return twoSum([2, 7, 11, 15], 9)`,
         expected: [0, 1],
       },
       {
         name: 'with negatives',
+        traceLabel: '[-1,4,5,0], target=3',
         code: `return twoSum([-1, 4, 5, 0], 3)`,
         expected: [0, 1],
       },

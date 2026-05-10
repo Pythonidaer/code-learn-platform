@@ -379,7 +379,7 @@ details.tutorDetails > summary {
 .codingWorkspaceDesktop .wsCenterMain {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(120px, 1fr) minmax(72px, auto) 6px 200px;
+  grid-template-rows: minmax(120px, 1fr) minmax(48px, auto) 6px 200px;
   align-items: stretch;
 }
 
@@ -536,7 +536,7 @@ details.tutorDetails > summary {
 .wsEditorActionsBar {
   flex: 0 0 auto;
   box-sizing: border-box;
-  min-height: 72px;
+  min-height: 48px;
   height: auto;
   display: flex;
   align-items: center;
@@ -551,7 +551,7 @@ details.tutorDetails > summary {
   align-self: stretch;
   height: auto;
   max-height: none;
-  min-height: 72px;
+  min-height: 48px;
 }
 
 .wsEditorActionsGroup {
@@ -569,10 +569,10 @@ details.tutorDetails > summary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 0.75rem;
-  padding: 0.4rem 0.65rem;
+  gap: 0.35rem 0.6rem;
+  padding: 0.32rem 0.55rem;
   background: #080808;
-  border-bottom: 1px solid #222;
+  border-bottom: 1px solid #1f1f1f;
   min-width: 0;
   overflow-x: auto;
 }
@@ -774,62 +774,6 @@ details.tutorDetails > summary {
   outline-offset: 2px;
 }
 
-.wsBtnStepThrough {
-  font: inherit;
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 0.35rem 0.6rem;
-  background: #1a1508;
-  border: 1px solid #9e6a03;
-  color: #e3b341;
-  border-radius: 2px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.wsBtnStepThrough:hover:not(:disabled) {
-  border-color: #d29922;
-  color: #f0d04a;
-}
-
-.wsBtnStepThrough:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.wsBtnStepThrough:focus-visible {
-  outline: 2px solid #d29922;
-  outline-offset: 2px;
-}
-
-.wsTraceCaseLabel {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.08rem;
-  align-items: flex-start;
-  max-width: min(14rem, 100%);
-}
-
-.wsTraceCaseHeading {
-  font-size: 0.58rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #8b949e;
-}
-
-.wsTraceSelect {
-  font: inherit;
-  font-size: 0.62rem;
-  background: #0d1117;
-  color: #e6edf3;
-  border: 1px solid #3a3a3a;
-  border-radius: 2px;
-  padding: 0.2rem 0.35rem;
-  min-width: 6.5rem;
-  max-width: 100%;
-}
-
 .wsBtnSubmit {
   font: inherit;
   font-size: 0.68rem;
@@ -999,6 +943,52 @@ details.tutorDetails > summary {
   background: #050508;
 }
 
+/* Step trace variables: rendered below Monaco (not as a content widget) so text never
+   paints over the buffer. */
+.wsTraceValuesStrip {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(227, 179, 65, 0.35);
+  background: #0e0c06;
+  color: #f5d76a;
+}
+
+.wsTraceValuesStripHead {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.32rem 0.6rem 0.15rem;
+  border-bottom: 1px solid rgba(227, 179, 65, 0.2);
+}
+
+.wsTraceValuesStripLabel {
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(227, 179, 65, 0.95);
+}
+
+.wsTraceValuesStripMeta {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(210, 200, 160, 0.75);
+}
+
+.wsTraceValuesPre {
+  margin: 0;
+  padding: 0.38rem 0.6rem 0.5rem;
+  max-height: min(36vh, 14rem);
+  overflow: auto;
+  font-family: ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #f5d76a;
+}
+
 /* Grid row 1 (minmax(120px, 1fr)) controls editor height; no CSS max-height needed. */
 
 .wsBannerOk {
@@ -1041,12 +1031,18 @@ details.tutorDetails > summary {
 
 .wsConsoleHead {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  gap: 0;
   padding: 0;
   border-bottom: 1px solid #222;
+}
+
+.wsConsoleTablist {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  min-height: 36px;
 }
 
 .wsConsoleTab {
@@ -1092,7 +1088,7 @@ details.tutorDetails > summary {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 0.65rem 0.75rem;
+  padding: 0.4rem 0.55rem 0.6rem;
   overflow: hidden;
 }
 

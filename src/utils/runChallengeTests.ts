@@ -1,3 +1,5 @@
+import * as React from 'react'
+import { renderToString } from 'react-dom/server'
 import type { CodingTestCase } from '../types/challenge'
 
 export interface ChallengeTestResult {
@@ -67,6 +69,46 @@ export interface RunChallengeTestsOutput {
   consoleLines: CapturedConsoleLine[]
 }
 
+export interface RunChallengeTestsOptions {
+  /** Workspace is JSX + React imports; compile with Babel and inject `React` / `renderToString`. */
+  react?: boolean
+}
+
+const AsyncFunctionConstructor = Object.getPrototypeOf(
+  async function () {
+    /* noop */
+  },
+).constructor as typeof Function
+
+/** After stripping `import { useState } from 'react'`, compiled JSX still references hooks by name. */
+const REACT_RUNNER_PREAMBLE = `const {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  useReducer,
+  useLayoutEffect,
+  useId,
+  useContext,
+  useImperativeHandle,
+  useInsertionEffect,
+  useSyncExternalStore,
+  useDeferredValue,
+  useTransition,
+  memo,
+  forwardRef,
+  createContext,
+  lazy,
+  startTransition,
+  Fragment,
+  Component,
+  PureComponent,
+  StrictMode,
+  Suspense,
+} = React
+`
+
 const CONSOLE_TAP_METHODS: readonly ConsoleCaptureLevel[] = [
   'log',
   'info',
@@ -108,10 +150,14 @@ function installConsoleTap(
  * are forwarded to the real console and mirrored in `consoleLines`.
  *
  * Not a secure sandbox—local learning only; replace with a backend runner for production.
+ *
+ * For **`react`**, user code is stripped of `import … from 'react'`, transpiled from JSX, and
+ * evaluated with **`React`** and **`renderToString`** available to test snippets.
  */
 export async function runChallengeTests(
   userCode: string,
   testCases: CodingTestCase[],
+  options?: RunChallengeTestsOptions,
 ): Promise<RunChallengeTestsOutput> {
   const consoleLines: CapturedConsoleLine[] = []
   const restoreConsole = installConsoleTap((level, args) => {
@@ -120,11 +166,29 @@ export async function runChallengeTests(
 
   const results: ChallengeTestResult[] = []
   try {
+    let preparedUser = userCode
+    if (options?.react) {
+      const { transpileReactWorkspaceForRunner } = await import(
+        './transpileReactWorkspaceForRunner',
+      )
+      preparedUser = `${REACT_RUNNER_PREAMBLE}\n${transpileReactWorkspaceForRunner(userCode)}`
+    }
+
     for (const tc of testCases) {
       try {
-        const wrapped = `${userCode}\n\n;return (async function() {\n${tc.code}\n})();`
-        const fn = new Function(wrapped)
-        const actual = await Promise.resolve(fn())
+        const wrapped = `${preparedUser}\n\n;return (async function() {\n${tc.code}\n})();`
+        let actual: unknown
+        if (options?.react) {
+          const fn = new AsyncFunctionConstructor(
+            'React',
+            'renderToString',
+            wrapped,
+          ) as (react: typeof React, rts: typeof renderToString) => Promise<unknown>
+          actual = await fn(React, renderToString)
+        } else {
+          const fn = new Function(wrapped)
+          actual = await Promise.resolve(fn())
+        }
 
         const passed = matchesExpected(actual, tc.expected)
         results.push({

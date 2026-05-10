@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type KeyboardEvent,
@@ -34,6 +35,17 @@ import styles from './AITutorPanel.module.css'
 /** Max height before internal scroll (keep in sync with `.textareaComposer` max-height). */
 const COMPOSER_TEXTAREA_MAX_PX = 160
 
+/** Rate steps must match speech prefs / useSpeechSynthesis clamping. */
+const SPEECH_RATE_OPTIONS: readonly number[] = [
+  0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,
+]
+
+function nearestSpeechRate(r: number): number {
+  return SPEECH_RATE_OPTIONS.reduce((best, s) =>
+    Math.abs(s - r) < Math.abs(best - r) ? s : best,
+  )
+}
+
 const SHORTCUT_ORDER = [
   'hint',
   'explain_prompt',
@@ -54,6 +66,21 @@ interface Props {
   embedded?: boolean
   /** When embedded in the workspace, portaled into this element (right side of tutor header). */
   tutorHeaderActionsHost?: HTMLElement | null
+}
+
+/** Shorter voice names for the toolbar; full string in option/select title + speech engine. */
+function shortVoiceDisplayName(v: {
+  name: string
+  lang: string
+}): string {
+  let n = v.name.replace(/\s+/g, ' ').trim()
+  n = n.replace(/\bEnglish\s+/gi, '')
+  n = n.replace(/\s*\([^)]{3,80}\)\s*$/g, '')
+  n = n.replace(/\s*-\s*English\s*$/i, '')
+  n = n.replace(/\s{2,}/g, ' ')
+  n = n.trim()
+  if (n.length > 34) n = `${n.slice(0, 31)}…`
+  return n || v.name
 }
 
 function shortcutUserLabel(intent: TutorShortcutIntent): string {
@@ -149,6 +176,25 @@ function GearIcon() {
   )
 }
 
+function ToolbarSpeakerIcon() {
+  return (
+    <svg className={styles.toolbarIcon} viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="currentColor"
+        d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02ZM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77Z"
+      />
+    </svg>
+  )
+}
+
+function ToolbarVoiceGlyph() {
+  return (
+    <svg className={styles.toolbarIconMuted} viewBox="0 0 24 24" aria-hidden>
+      <path fill="currentColor" d="M4 14h2V10H4v4zm5 2h2V8H9v8zm5-4h2v-4h-2v4zm5-6v12h2V6h-2z" />
+    </svg>
+  )
+}
+
 function TutorActionsMenu({
   loading,
   onShortcut,
@@ -206,8 +252,9 @@ function TutorActionsMenu({
               close()
               onClearCache()
             }}
+            title="Clear tutor cache for this challenge"
           >
-            Clear tutor cache (this challenge)
+            Clear tutor cache
           </button>
           <div className={styles.menuSep} aria-hidden />
           {SHORTCUT_ORDER.map((intent) => (
@@ -427,7 +474,7 @@ export function AITutorPanel({
     <div className={styles.chatScroll}>
       {messages.length === 0 && !loading && !error ? (
         <p className={styles.hint}>
-          Use the tutor menu (⚙) or type below.
+          Use the tutor menu or type below.
         </p>
       ) : null}
       {messages.map((m, idx) => {
@@ -514,7 +561,7 @@ export function AITutorPanel({
           className={styles.textareaComposer}
           rows={1}
           placeholder={
-            loading ? 'Waiting for tutor response…' : 'Ask the tutor…'
+            loading ? 'Waiting for response…' : 'Message the tutor…'
           }
           value={input}
           disabled={loading}
@@ -581,83 +628,137 @@ export function AITutorPanel({
       ? speech.selectedVoiceUri
       : ''
 
+  const rateSelectValue = nearestSpeechRate(speech.rate)
+
+  const voiceSelectMeta = useMemo(() => {
+    if (!speechVoiceSelectValue) {
+      return {
+        title: 'Browser default voice',
+        ariaLabel: 'Speech voice: Default Voice',
+      }
+    }
+    const v = speech.voices.find((x) => x.voiceURI === speechVoiceSelectValue)
+    if (!v) return { title: '', ariaLabel: 'Speech voice' }
+    return {
+      title: `${v.name} (${v.lang})`,
+      ariaLabel: `Speech voice: ${v.name}`,
+    }
+  }, [speech.voices, speechVoiceSelectValue])
+
   const speechBar = (
     <div className={styles.speechBar}>
       {speech.isSupported ? (
         <>
-          <div className={styles.speechBarMain}>
-            <div className={styles.readAloudRow}>
-              <input
-                id="tutor-read-aloud"
-                data-testid="ai-tutor-read-aloud"
-                type="checkbox"
-                className={styles.readAloudCheckbox}
-                checked={readResponsesAloud}
-                onChange={(e) => {
-                  const v = e.target.checked
-                  setReadResponsesAloud(v)
-                  setReadAloudPreference(v)
-                }}
-              />
-              <label htmlFor="tutor-read-aloud" className={styles.readAloudLabel}>
-                Read responses aloud
-              </label>
-            </div>
-            <div className={styles.speechControlsRow}>
-              <label className={styles.speechFieldLabel} htmlFor="tutor-voice">
-                Voice
-              </label>
-              <select
-                id="tutor-voice"
-                data-testid="ai-tutor-voice-select"
-                className={styles.voiceSelect}
-                value={speechVoiceSelectValue}
-                aria-label="Speech synthesis voice"
-                onChange={(e) => {
-                  const uri = e.target.value
-                  if (!uri) {
-                    speech.setSelectedVoice(null)
-                    return
-                  }
-                  const v = speech.voices.find((x) => x.voiceURI === uri)
-                  speech.setSelectedVoice(v ?? null)
-                }}
+          <div
+            className={styles.speechToolbarShell}
+            role="group"
+            aria-label="Read-aloud and voice"
+          >
+            <div className={styles.speechOneRow}>
+              <div className={styles.readAloudCluster}>
+                <ToolbarSpeakerIcon />
+                <label
+                  className={styles.readAloudTitle}
+                  htmlFor="tutor-read-aloud"
+                >
+                  <span
+                    className={styles.readAloudLabelText}
+                    aria-hidden="true"
+                  >
+                    Read aloud
+                  </span>
+                </label>
+                <div className={styles.switchTrack}>
+                  <input
+                    id="tutor-read-aloud"
+                    data-testid="ai-tutor-read-aloud"
+                    type="checkbox"
+                    role="switch"
+                    className={styles.switchInput}
+                    aria-label="Read AI tutor responses aloud"
+                    checked={readResponsesAloud}
+                    onChange={(e) => {
+                      const v = e.target.checked
+                      setReadResponsesAloud(v)
+                      setReadAloudPreference(v)
+                    }}
+                  />
+                  <span className={styles.switchUi} aria-hidden="true" />
+                </div>
+              </div>
+              <div className={styles.shellDivider} aria-hidden="true" />
+              <ToolbarVoiceGlyph />
+              <div className={`${styles.fieldStack} ${styles.voiceFieldGrow}`}>
+                <label
+                  className={`${styles.fieldCaption} ${styles.fieldCaptionVoice}`}
+                  htmlFor="tutor-voice"
+                  aria-hidden="true"
+                >
+                  Voice
+                </label>
+                <select
+                  id="tutor-voice"
+                  data-testid="ai-tutor-voice-select"
+                  className={styles.voiceSelectBar}
+                  value={speechVoiceSelectValue}
+                  title={voiceSelectMeta.title}
+                  aria-label={voiceSelectMeta.ariaLabel}
+                  onChange={(e) => {
+                    const uri = e.target.value
+                    if (!uri) {
+                      speech.setSelectedVoice(null)
+                      return
+                    }
+                    const v = speech.voices.find((x) => x.voiceURI === uri)
+                    speech.setSelectedVoice(v ?? null)
+                  }}
+                >
+                  <option value="">Default Voice</option>
+                  {speech.voices.map((v) => (
+                    <option
+                      key={v.voiceURI}
+                      value={v.voiceURI}
+                      title={`${v.name} (${v.lang})`}
+                    >
+                      {shortVoiceDisplayName(v)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.shellDivider} aria-hidden="true" />
+              <div
+                className={`${styles.fieldStack} ${styles.rateFieldNarrow}`}
               >
-                <option value="">
-                  Default browser voice
-                </option>
-                {speech.voices.map((v) => (
-                  <option key={v.voiceURI} value={v.voiceURI}>
-                    {v.name} ({v.lang})
-                  </option>
-                ))}
-              </select>
+                <label
+                  className={`${styles.fieldCaption} ${styles.fieldCaptionRate}`}
+                  htmlFor="tutor-speech-rate"
+                  aria-hidden="true"
+                >
+                  Rate
+                </label>
+                <select
+                  id="tutor-speech-rate"
+                  data-testid="ai-tutor-speech-rate"
+                  className={styles.rateSelectBar}
+                  value={rateSelectValue}
+                  aria-label="Speech playback rate"
+                  onChange={(e) => speech.setRate(Number(e.target.value))}
+                >
+                  {SPEECH_RATE_OPTIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r.toFixed(1)}×
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className={styles.rateRow}>
-              <label className={styles.rateLabel} htmlFor="tutor-speech-rate">
-                Rate{' '}
-                <span aria-hidden>{speech.rate.toFixed(2)}×</span>
-              </label>
-              <input
-                id="tutor-speech-rate"
-                data-testid="ai-tutor-speech-rate"
-                type="range"
-                className={styles.rateRange}
-                min={0.5}
-                max={2}
-                step={0.25}
-                value={speech.rate}
-                aria-label="Speech rate"
-                onChange={(e) => speech.setRate(Number(e.target.value))}
-              />
-            </div>
-            {speech.voices.length === 0 ? (
-              <p className={styles.speechFootnote} role="status">
-                Voices may appear after the page finishes loading; if the list
-                stays empty, your browser may use a single default voice.
-              </p>
-            ) : null}
           </div>
+          {speech.voices.length === 0 ? (
+            <p className={styles.speechFootnote} role="status">
+              Voices may load after the page finishes; if the list stays empty,
+              the browser uses its default voice.
+            </p>
+          ) : null}
         </>
       ) : (
         <p className={styles.speechNotice} role="status">

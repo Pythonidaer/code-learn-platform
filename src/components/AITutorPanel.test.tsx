@@ -114,7 +114,7 @@ describe('AITutorPanel speech UI', () => {
     expect(screen.queryByText('Old question')).not.toBeInTheDocument()
     expect(screen.queryByText('Old answer')).not.toBeInTheDocument()
     expect(
-      screen.getByText(/Use the tutor menu \(⚙\) or type below/i),
+      screen.getByText(/Use the tutor menu or type below/i),
     ).toBeVisible()
   })
 

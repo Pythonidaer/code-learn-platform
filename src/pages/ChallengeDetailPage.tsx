@@ -62,6 +62,16 @@ import {
   saveTutorCollapsed,
   saveTutorWidth,
 } from '../utils/workspaceLayoutStorage'
+import {
+  filterAndSortTraceVariables,
+  formatTraceInlineSummary,
+} from '../utils/traceDisplay'
+import { getTestCaseDisplayLabel } from '../utils/testCaseLabel'
+import {
+  monacoLanguageForChallenge,
+  monacoModelPathForChallenge,
+  workspaceEditorFileName,
+} from '../utils/monacoChallengeLanguage'
 import styles from './ChallengeDetailPage.module.css'
 
 const WORKSPACE_DESKTOP_MIN_PX = 1025
@@ -84,14 +94,6 @@ function initialCode(
   if (isReactChallenge(challenge))
     return challenge.brokenComponentCode ?? challenge.componentCode
   return ''
-}
-
-function editorLanguage(): 'javascript' {
-  return 'javascript'
-}
-
-function solutionFileName(): string {
-  return 'solution.js'
 }
 
 const TOOLTIP_W = 234 // matches CSS width + borders
@@ -566,7 +568,11 @@ function CodingOrDebuggingView({
     setSubmitSuccess(false)
     setHiddenSummary(null)
     try {
-      const { results, consoleLines } = await runChallengeTests(code, tests)
+      const { results, consoleLines } = await runChallengeTests(
+        code,
+        tests,
+        isReactChallenge(challenge) ? { react: true } : undefined,
+      )
       setDisplayResults(results)
       setCapturedConsoleLines(consoleLines)
       setTestRunPhase('visible_only')
@@ -637,7 +643,11 @@ function CodingOrDebuggingView({
     setHiddenSummary(null)
     try {
       const all = [...tests, ...hidden]
-      const { results, consoleLines } = await runChallengeTests(code, all)
+      const { results, consoleLines } = await runChallengeTests(
+        code,
+        all,
+        isReactChallenge(challenge) ? { react: true } : undefined,
+      )
       setDisplayResults(results)
       setCapturedConsoleLines(consoleLines)
       setTestRunPhase('full_submit')
@@ -715,6 +725,26 @@ function CodingOrDebuggingView({
       ? step.lineNumber
       : null
   }, [traceSteps, tracePlayheadIdx])
+
+  const traceCurrentStep = traceSteps?.[tracePlayheadIdx]
+
+  const traceInlineSummary = useMemo(() => {
+    if (!traceCurrentStep) return null
+    const v = traceCurrentStep.visibleValues
+    if (v && Object.keys(v).length > 0)
+      return formatTraceInlineSummary(Object.entries(v))
+    const legacy = traceCurrentStep.variables
+    if (legacy && Object.keys(legacy).length > 0) {
+      const rows = filterAndSortTraceVariables(legacy)
+      return rows.length > 0 ? formatTraceInlineSummary(rows) : null
+    }
+    return null
+  }, [traceCurrentStep])
+
+  const traceExampleLabel =
+    tests.length > 0
+      ? getTestCaseDisplayLabel(tests[traceCaseIdx]!)
+      : ''
 
   const statusLabel = done
     ? 'Completed'
@@ -855,7 +885,9 @@ function CodingOrDebuggingView({
         aria-label="Editor and test output"
       >
         <div className={styles.wsPanelHeader}>
-          <span className={styles.wsFileTab}>{solutionFileName()}</span>
+          <span className={styles.wsFileTab}>
+            {workspaceEditorFileName(challenge)}
+          </span>
           <span
             className={
               done ? styles.wsStatusDone : styles.wsStatusPill
@@ -878,10 +910,30 @@ function CodingOrDebuggingView({
               <MonacoCodeEditor
                 value={code}
                 onChange={onCodeChange}
-                language={editorLanguage()}
+                language={monacoLanguageForChallenge(challenge)}
+                modelPath={monacoModelPathForChallenge(challenge)}
                 flexHeight
                 highlightedTraceLine={traceHighlightedLine}
               />
+              {traceHighlightedLine && traceInlineSummary ? (
+                <div
+                  className={styles.wsTraceValuesStrip}
+                  role="region"
+                  aria-label={`Current step values (line ${traceHighlightedLine})`}
+                >
+                  <div className={styles.wsTraceValuesStripHead}>
+                    <span className={styles.wsTraceValuesStripLabel}>
+                      Step values
+                    </span>
+                    <span className={styles.wsTraceValuesStripMeta}>
+                      Line {traceHighlightedLine}
+                    </span>
+                  </div>
+                  <pre className={styles.wsTraceValuesPre}>
+                    {traceInlineSummary}
+                  </pre>
+                </div>
+              ) : null}
             </div>
 
             {manualOnly ? (
@@ -964,47 +1016,6 @@ function CodingOrDebuggingView({
               >
                 Run Code
               </button>
-              {tests.length > 0 ? (
-                <label className={styles.wsTraceCaseLabel}>
-                  <span className={styles.wsTraceCaseHeading}>Trace case</span>
-                  <select
-                    className={styles.wsTraceSelect}
-                    aria-label="Trace test case"
-                    value={traceCaseIdx}
-                    disabled={
-                      traceRunning ||
-                      running ||
-                      !automated ||
-                      manualOnly ||
-                      tests.length === 0
-                    }
-                    onChange={(e) =>
-                      setTraceCaseIndex(Number(e.target.value))
-                    }
-                  >
-                    {tests.map((t, idx) => (
-                      <option key={t.name} value={idx}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              <button
-                type="button"
-                className={styles.wsBtnStepThrough}
-                disabled={
-                  running ||
-                  traceRunning ||
-                  !automated ||
-                  manualOnly ||
-                  tests.length === 0
-                }
-                onClick={() => void handleStepThrough()}
-                data-testid="step-through"
-              >
-                Step Through
-              </button>
               <button
                 type="button"
                 className={styles.wsBtnSubmit}
@@ -1037,54 +1048,59 @@ function CodingOrDebuggingView({
           <div className={styles.wsConsole}>
             <div
               className={styles.wsConsoleHead}
-              role="tablist"
-              aria-label="Output panels"
+              aria-label="Output panels and tracing"
             >
-              <button
-                type="button"
-                id="workspace-tab-tests"
-                className={
-                  workspaceOutputTab === 'tests'
-                    ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
-                    : styles.wsConsoleTab
-                }
-                role="tab"
-                aria-selected={workspaceOutputTab === 'tests'}
-                aria-controls="workspace-panel-tests"
-                onClick={() => setWorkspaceOutputTab('tests')}
+              <div
+                className={styles.wsConsoleTablist}
+                role="tablist"
+                aria-label="Output panels"
               >
-                Test output
-              </button>
-              <button
-                type="button"
-                id="workspace-tab-trace"
-                className={
-                  workspaceOutputTab === 'trace'
-                    ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
-                    : styles.wsConsoleTab
-                }
-                role="tab"
-                aria-selected={workspaceOutputTab === 'trace'}
-                aria-controls="workspace-panel-trace"
-                onClick={() => setWorkspaceOutputTab('trace')}
-              >
-                Step trace
-              </button>
-              <button
-                type="button"
-                id="workspace-tab-console"
-                className={
-                  workspaceOutputTab === 'console'
-                    ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
-                    : styles.wsConsoleTab
-                }
-                role="tab"
-                aria-selected={workspaceOutputTab === 'console'}
-                aria-controls="workspace-panel-console"
-                onClick={() => setWorkspaceOutputTab('console')}
-              >
-                Console
-              </button>
+                <button
+                  type="button"
+                  id="workspace-tab-tests"
+                  className={
+                    workspaceOutputTab === 'tests'
+                      ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
+                      : styles.wsConsoleTab
+                  }
+                  role="tab"
+                  aria-selected={workspaceOutputTab === 'tests'}
+                  aria-controls="workspace-panel-tests"
+                  onClick={() => setWorkspaceOutputTab('tests')}
+                >
+                  Test output
+                </button>
+                <button
+                  type="button"
+                  id="workspace-tab-trace"
+                  className={
+                    workspaceOutputTab === 'trace'
+                      ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
+                      : styles.wsConsoleTab
+                  }
+                  role="tab"
+                  aria-selected={workspaceOutputTab === 'trace'}
+                  aria-controls="workspace-panel-trace"
+                  onClick={() => setWorkspaceOutputTab('trace')}
+                >
+                  Step trace
+                </button>
+                <button
+                  type="button"
+                  id="workspace-tab-console"
+                  className={
+                    workspaceOutputTab === 'console'
+                      ? `${styles.wsConsoleTab} ${styles.wsConsoleTabActive}`
+                      : styles.wsConsoleTab
+                  }
+                  role="tab"
+                  aria-selected={workspaceOutputTab === 'console'}
+                  aria-controls="workspace-panel-console"
+                  onClick={() => setWorkspaceOutputTab('console')}
+                >
+                  Console
+                </button>
+              </div>
             </div>
             <div
               className={styles.wsConsoleBody}
@@ -1120,11 +1136,24 @@ function CodingOrDebuggingView({
                     currentIndex={tracePlayheadIdx}
                     onIndexChange={setTracePlayhead}
                     onResetIndex={() => setTracePlayhead(0)}
-                    testCaseName={tests[traceCaseIdx]?.name}
+                    onStepThrough={() => void handleStepThrough()}
+                    stepThroughDisabled={
+                      running ||
+                      !automated ||
+                      manualOnly ||
+                      tests.length === 0
+                    }
+                    traceRunning={traceRunning}
+                    visibleTests={tests}
+                    traceCaseIndex={traceCaseIdx}
+                    onTraceCaseChange={setTraceCaseIndex}
+                    caseSelectDisabled={
+                      running || !automated || manualOnly || tests.length === 0
+                    }
                     unsupportedOrFatal={traceOutcomeMessage}
-                    loading={traceRunning}
                     finalReturnValue={traceFinalReturn}
                     testPassed={traceTestMatched}
+                    selectedExampleLabel={traceExampleLabel}
                   />
                 </div>
               ) : (

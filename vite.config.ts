@@ -17,6 +17,12 @@ const monacoEditorPlugin =
 // CodeMirror was not needed; this setup avoids manual worker URL wiring.
 
 export default defineConfig(({ mode }) => ({
+  define: {
+    global: 'globalThis',
+    'process.env.NODE_ENV': JSON.stringify(
+      mode === 'production' ? 'production' : 'development',
+    ),
+  },
   /** Production CI/GitHub Pages project-site (`/:repo/`). Dev stays `'/'`. */
   base: mode === 'production' ? '/code-learn-platform/' : '/',
   plugins: [

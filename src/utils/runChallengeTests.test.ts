@@ -86,6 +86,46 @@ describe('runChallengeTests', () => {
     expect(consoleLines.map((c) => c.text).join(' | ')).toMatch(/watch/)
     expect(consoleLines.some((c) => c.level === 'warn')).toBe(true)
   })
+
+  it('runs react workspace: transpiles JSX and supplies React + renderToString', async () => {
+    const user = `import { useState } from 'react'
+
+function Parent() {
+  const [on, setOn] = useState(false)
+  return (
+    <>
+      <Toolbar on={on} setOn={setOn} />
+      <Preview on={on} />
+    </>
+  )
+}
+
+function Toolbar({ on, setOn }) {
+  return (
+    <button type="button" onClick={() => setOn((prev) => !prev)}>
+      Toggle
+    </button>
+  )
+}
+
+function Preview({ on }) {
+  return <p>{on ? 'ON' : 'OFF'}</p>
+}
+`
+    const { results } = await runChallengeTests(
+      user,
+      [
+        {
+          name: 'initial preview shows OFF',
+          code: `const html = renderToString(React.createElement(Parent))
+return html.includes('OFF')`,
+          expected: true,
+        },
+      ],
+      { react: true },
+    )
+    expect(results[0].passed).toBe(true)
+  })
 })
 
 describe('summarizeTestResults / allTestsPassed', () => {

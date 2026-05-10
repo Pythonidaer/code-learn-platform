@@ -1,4 +1,10 @@
+import type { CodingTestCase } from '../types/challenge'
 import type { TraceStep } from '../types/trace'
+import {
+  displayTraceDescription,
+  traceEventKindLabel,
+} from '../utils/traceDisplay'
+import { getTestCaseDisplayLabel } from '../utils/testCaseLabel'
 import { safeStringify } from '../utils/safeStringify'
 import styles from './TracePanel.module.css'
 
@@ -11,18 +17,28 @@ function formatValue(v: unknown): string {
   }
 }
 
+function snapshotEntries(step: TraceStep): [string, unknown][] {
+  const full = step.fullSnapshot ?? step.variables
+  if (!full) return []
+  return Object.entries(full)
+}
+
 interface Props {
   steps: TraceStep[] | null
   currentIndex: number
   onIndexChange: (next: number) => void
   onResetIndex: () => void
-  testCaseName?: string
-  /** Instrumentation unsupported or fatal wrapper message */
+  onStepThrough: () => void
+  stepThroughDisabled: boolean
+  traceRunning: boolean
+  visibleTests: readonly CodingTestCase[]
+  traceCaseIndex: number
+  onTraceCaseChange: (index: number) => void
+  caseSelectDisabled: boolean
+  /** Human-readable label for the selected visible test (example input). */
+  selectedExampleLabel: string
   unsupportedOrFatal?: string | null
-  loading?: boolean
-  /** Latest test snippet return value (after successful trace run). */
   finalReturnValue?: unknown
-  /** Result vs challenge expected for selected test */
   testPassed?: boolean
 }
 
@@ -31,40 +47,121 @@ export function TracePanel({
   currentIndex,
   onIndexChange,
   onResetIndex,
-  testCaseName,
+  onStepThrough,
+  stepThroughDisabled,
+  traceRunning,
+  visibleTests,
+  traceCaseIndex,
+  onTraceCaseChange,
+  caseSelectDisabled,
+  selectedExampleLabel,
   unsupportedOrFatal,
-  loading,
   finalReturnValue,
   testPassed,
 }: Props) {
-  if (loading) {
-    return (
-      <div className={styles.wrap} data-testid="step-trace-panel">
-        <p className={styles.idle}>Generating step trace…</p>
-      </div>
-    )
-  }
+  const n = steps?.length ?? 0
+  const cur = n > 0 ? steps![Math.min(currentIndex, n - 1)]! : null
 
   const idleHint =
     !steps?.length && !unsupportedOrFatal ? (
       <p className={styles.idle}>
-        Pick a visible test above, then choose <strong>Step Through</strong> to see
-        an educational execution timeline here. Output from Run Code stays on the{' '}
-        <strong>Test output</strong> tab.
+        Choose an <strong>example input</strong> if there are several, then{' '}
+        <strong>Step through</strong> to run that case only. Values appear beside the
+        highlighted line in the editor.
       </p>
     ) : null
 
-  const n = steps?.length ?? 0
-  const cur = n > 0 ? steps![Math.min(currentIndex, n - 1)]! : null
   const lineLabel =
-    cur?.lineNumber != null ? String(cur.lineNumber) : '—'
+    cur?.lineNumber != null && cur.lineNumber > 0
+      ? String(cur.lineNumber)
+      : '—'
 
   const goPrev = () => onIndexChange(Math.max(0, currentIndex - 1))
-  const goNext = () => onIndexChange(Math.min(Math.max(n - 1, 0), currentIndex + 1))
+  const goNext = () =>
+    onIndexChange(Math.min(Math.max(n - 1, 0), currentIndex + 1))
+
+  const hasSteps = n > 0
+  const showCasePicker = visibleTests.length > 0
 
   return (
     <div className={styles.wrap} data-testid="step-trace-panel">
-      {idleHint}
+      {traceRunning ? (
+        <p className={styles.tracingStatus} role="status">
+          Generating trace…
+        </p>
+      ) : null}
+      <div
+        className={styles.toolbar}
+        role="toolbar"
+        aria-label="Step trace controls"
+      >
+        <button
+          type="button"
+          className={styles.btn}
+          disabled={!hasSteps || currentIndex <= 0 || traceRunning}
+          onClick={goPrev}
+          data-testid="trace-step-prev"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          className={styles.btn}
+          disabled={!hasSteps || currentIndex >= n - 1 || traceRunning}
+          onClick={goNext}
+          data-testid="trace-step-next"
+        >
+          Next
+        </button>
+        <button
+          type="button"
+          className={styles.btn}
+          disabled={!hasSteps || traceRunning}
+          onClick={onResetIndex}
+          data-testid="trace-step-reset"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          className={styles.btnStepThrough}
+          disabled={stepThroughDisabled || traceRunning}
+          onClick={() => void onStepThrough()}
+          data-testid="step-through"
+        >
+          {traceRunning ? 'Tracing…' : 'Step through'}
+        </button>
+        <span className={styles.toolbarMeta} data-testid="trace-step-count">
+          Step {hasSteps ? currentIndex + 1 : 0} / {n}
+        </span>
+        {showCasePicker ? (
+          <label className={styles.caseInline}>
+            <span className={styles.caseInlineHint}>Example input</span>
+            <select
+              className={styles.caseSelect}
+              aria-label="Test case for step through"
+              value={Math.min(traceCaseIndex, visibleTests.length - 1)}
+              disabled={caseSelectDisabled || traceRunning}
+              onChange={(e) =>
+                onTraceCaseChange(Number(e.target.value))
+              }
+            >
+              {visibleTests.map((t, idx) => (
+                <option key={t.name} value={idx}>
+                  {getTestCaseDisplayLabel(t)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+      </div>
+
+      {selectedExampleLabel.trim() && showCasePicker ? (
+        <p className={styles.exampleBanner} data-testid="trace-example-banner">
+          <span className={styles.exampleBannerLab}>Selected</span>{' '}
+          <span className={styles.exampleBannerVal}>{selectedExampleLabel}</span>
+        </p>
+      ) : null}
 
       {unsupportedOrFatal ? (
         <p className={styles.warn} role="alert">
@@ -72,112 +169,86 @@ export function TracePanel({
         </p>
       ) : null}
 
-      {testCaseName ? (
-        <div className={styles.header}>
-          <span className={styles.testName}>
-            Tracing: <strong>{testCaseName}</strong>
-          </span>
-        </div>
-      ) : null}
+      {idleHint}
 
-      {n > 0 ? (
+      {hasSteps && cur ? (
         <>
-          <div className={styles.controls}>
-            <button
-              type="button"
-              className={styles.btn}
-              disabled={currentIndex <= 0}
-              onClick={goPrev}
-              data-testid="trace-step-prev"
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              className={styles.btn}
-              disabled={currentIndex >= n - 1}
-              onClick={goNext}
-              data-testid="trace-step-next"
-            >
-              Next
-            </button>
-            <button
-              type="button"
-              className={styles.btn}
-              onClick={onResetIndex}
-              data-testid="trace-step-reset"
-            >
-              Reset trace
-            </button>
-            <span className={styles.metrics} data-testid="trace-step-count">
-              Step {n > 0 ? currentIndex + 1 : 0} of {n}
-            </span>
-            <span className={styles.metrics}>Line {lineLabel}</span>
+          <div className={styles.stepCard} data-testid="trace-current-step">
+            <div className={styles.stepMetaRow}>
+              <span className={styles.kindPill}>
+                {traceEventKindLabel(cur.eventType)}
+              </span>
+              <span className={styles.linePill}>Line {lineLabel}</span>
+              <span className={styles.idxPill} data-testid="trace-step-index">
+                #{cur.stepIndex + 1}
+              </span>
+            </div>
+            <p className={styles.stepNarrative}>
+              {displayTraceDescription(cur)}
+            </p>
+            {cur.error ? (
+              <p className={styles.errLine} role="alert">
+                {cur.error}
+              </p>
+            ) : null}
+            {cur.eventType === 'return' && cur.returnValue !== undefined ? (
+              <div className={styles.returnBlock}>
+                <div className={styles.returnLabel}>Return value</div>
+                <pre className={styles.returnPre}>
+                  {formatValue(cur.returnValue)}
+                </pre>
+              </div>
+            ) : null}
+
+            {snapshotEntries(cur).length > 0 ? (
+              <details key={cur.id} className={styles.details}>
+                <summary className={styles.detailsSummary}>
+                  Full snapshot
+                </summary>
+                <div className={styles.detailsBody}>
+                  <table className={styles.varTable}>
+                    <tbody>
+                      {snapshotEntries(cur).map(([name, val]) => (
+                        <tr key={name}>
+                          <th className={styles.varName} scope="row">
+                            {name}
+                          </th>
+                          <td className={styles.varVal}>
+                            {formatValue(val)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            ) : null}
           </div>
 
           {finalReturnValue !== undefined && testPassed !== undefined ? (
-            <p
-              className={`${styles.summary} ${testPassed ? '' : styles.summaryFail}`}
-              data-testid="trace-test-outcome"
-            >
-              Test result: {testPassed ? 'matches expected' : 'differs from expected'}{' '}
-              (use Run Code for full verification).
-            </p>
-          ) : null}
-
-          {finalReturnValue !== undefined ? (
-            <div className={styles.block}>
-              <div className={styles.meta}>Final test return value</div>
-              <pre className={styles.desc}>
-                {formatValue(finalReturnValue)}
-              </pre>
-            </div>
-          ) : null}
-
-          {cur ? (
-            <div className={styles.block} data-testid="trace-current-step">
-              <div className={styles.meta}>
-                {cur.eventType}
-                {cur.lineNumber != null ? ` · line ${cur.lineNumber}` : ''}
+            <>
+              <p
+                className={`${styles.summary} ${testPassed ? '' : styles.summaryFail}`}
+                data-testid="trace-test-outcome"
+              >
+                This example:{' '}
+                {testPassed ? 'matches expected value' : 'differs from expected'} (use{' '}
+                <strong>Run code</strong> for all tests).
+              </p>
+              <div className={styles.finalBlock}>
+                <div className={styles.finalLabel}>Test snippet return</div>
+                <pre className={styles.returnPre}>
+                  {formatValue(finalReturnValue)}
+                </pre>
               </div>
-              <p className={styles.desc}>{cur.description}</p>
-              {cur.error ? (
-                <p className={styles.errLine} role="alert">
-                  {cur.error}
-                </p>
-              ) : null}
-              {cur.returnValue !== undefined ? (
-                <div>
-                  <div className={styles.meta}>Return value</div>
-                  <pre className={styles.desc}>
-                    {formatValue(cur.returnValue)}
-                  </pre>
-                </div>
-              ) : null}
-              {cur.variables && Object.keys(cur.variables).length > 0 ? (
-                <table className={styles.varTable}>
-                  <tbody>
-                    {Object.entries(cur.variables).map(([name, val]) => (
-                      <tr key={name}>
-                        <th className={styles.varName} scope="row">
-                          {name}
-                        </th>
-                        <td className={styles.varVal}>{formatValue(val)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : null}
-            </div>
+            </>
           ) : null}
         </>
       ) : null}
 
-      <p className={styles.note}>
-        <strong>Trace limitations.</strong> Step Through is an educational tracer, not
-        a full JavaScript debugger. Advanced syntax, async code, timers, DOM APIs, and
-        complex closures may not trace perfectly. <strong>Run Code</strong> remains the
-        source of truth for correctness.
+      <p className={styles.noteMuted}>
+        Trace limitations: educational tracer only — not a full debugger.{' '}
+        <strong>Run code</strong> is authoritative for correctness.
       </p>
     </div>
   )

@@ -22,6 +22,11 @@ export interface CodingTestCase {
   code: string
   expected: unknown
   explanation?: string
+  /**
+   * Human-readable input summary for Step trace UI (e.g. `[2,7,11,15], target=9`).
+   * When omitted, a short label is inferred from `code` when possible.
+   */
+  traceLabel?: string
 }
 
 export interface ChallengeBase {

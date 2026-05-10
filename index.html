@@ -9,6 +9,13 @@
   </head>
   <body style="margin: 0; background-color: #000000">
     <div id="root"></div>
+    <!-- Some tooling (e.g. Babel's debug tooling) touches `process` in browser bundles -->
+    <script>
+      ;(function () {
+        if (typeof globalThis.process !== 'undefined') return
+        globalThis.process = { env: {}, version: '', platform: '', browser: true }
+      })()
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

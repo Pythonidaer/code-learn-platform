@@ -13,9 +13,11 @@ A local-first interview prep platform with an AI tutor powered by a local Ollama
 | [05-ai-tutor.md](./05-ai-tutor.md) | AI Tutor panel, prompt engineering, message builder |
 | [06-llm-providers.md](./06-llm-providers.md) | Ollama workflow, env vars, OpenAI wiring plan |
 | [07-code-runner.md](./07-code-runner.md) | In-browser `new Function` runner, test format, limitations |
+| [trace-system.md](./trace-system.md) | **System #2** step trace — Run code vs Step through, `TraceStep` contract, filtering, Monaco |
 | [08-testing.md](./08-testing.md) | Vitest unit tests, Cypress component/e2e, Playwright e2e |
 | [09-workspace-layout.md](./09-workspace-layout.md) | 4-column grid, resize handles, collapsed panels, localStorage |
 | [10-challenge-dataset.md](./10-challenge-dataset.md) | Current dataset inventory, problems, full 40–50 challenge expansion plan |
+| [11-monaco-editor.md](./11-monaco-editor.md) | Monaco language ids, JSX/React worker config, `addExtraLib` typings |
 
 ---
 

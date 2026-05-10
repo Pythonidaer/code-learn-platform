@@ -41,7 +41,7 @@ describe('clampConsoleHeight', () => {
 
 describe('maxConsoleHeightForCenterPanel', () => {
   it('returns main stack height minus reserve (editor min + actions bar + handle)', () => {
-    expect(maxConsoleHeightForCenterPanel(1000)).toBe(802)
+    expect(maxConsoleHeightForCenterPanel(1000)).toBe(826)
   })
 
   it('falls back when invalid', () => {

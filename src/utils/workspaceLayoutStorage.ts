@@ -15,7 +15,7 @@ export const TUTOR_WIDTH_DEFAULT = 320
 export const CONSOLE_HEIGHT_MIN = 120
 export const CONSOLE_HEIGHT_DEFAULT = 200
 /** Fixed band under the Monaco editor (Clear / Run / Submit) before the splitter. */
-export const CENTER_EDITOR_ACTIONS_BAR_PX = 72
+export const CENTER_EDITOR_ACTIONS_BAR_PX = 48
 /** Pixels reserved above the console: min editor 120px + actions bar + 6px handle. */
 export const CONSOLE_RESERVE_ABOVE_PX =
   120 + CENTER_EDITOR_ACTIONS_BAR_PX + 6
